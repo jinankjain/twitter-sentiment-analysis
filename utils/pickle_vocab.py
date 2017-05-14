@@ -4,13 +4,14 @@ import sys
 
 
 def main(root):
-    vocab = dict()
-    with open(root+'/vocab_cut.txt') as f:
+    vocab = {"<unk>": 0}
+    with open(root+'/vocab_trimmed.txt') as f:
         for idx, line in enumerate(f):
-            vocab[line.strip()] = idx
+            tok = line.split()[1]
+            vocab[tok] = idx + 1
 
     with open(root+'/vocab.pkl', 'wb') as f:
-        pickle.dump(vocab, f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(vocab, f)
 
 
 if __name__ == '__main__':
