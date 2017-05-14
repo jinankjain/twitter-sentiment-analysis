@@ -1,4 +1,5 @@
-
+from sklearn.linear_model import LogisticRegression
+import pickle
 from keras.datasets import imdb
 from keras.layers import LSTM
 from keras.layers.convolutional import Conv1D
@@ -31,7 +32,7 @@ def load_data():
     return (X_train,y_train,X_test,y_test)
 
 #Create model
-def baseline_model():
+def deepmodel():
 	# create model
     model = Sequential()
     model.add(Embedding(top_words, embedding_vecor_length, input_length=max_review_length))
@@ -41,9 +42,32 @@ def baseline_model():
     model.add(Dense(1, activation='sigmoid'))
     return model
 
+#Train normal model and tell us how good it is
+def train_normal(X_train, y_train, X_test, y_test):
+    model = LogisticRegression()
+    model.fit(X_train, y_train)
+    # save the model to disk
+    filename = 'normald_model.sav'
+    pickle.dump(model, open(filename, 'wb'))
+    model.fit(X_train, y_train)
+    # Final evaluation of the model
+    print("Accuracy: %.2f%%" % (accuracy_score(model.predict(X_test),y_test)*100))
+    print("Saved model to disk")
+
+#you can predict on X using this method where positive is the label number for positive samples and negative the label for the rest.
+def predict_normal(X,positive,negative):
+
+    loaded_model = pickle.load(open('normald_model.sav', 'rb'))
+    y_predict=loaded_model.predict(X)
+    predictor = lambda x: negative if x < 0.5 else positive
+    pfunc = numpy.vectorize(predictor)
+
+    return pfunc(y_predict)
+
+
 #Train model and tell us how good it is
-def train(X_train, y_train,X_test, y_test,iterations,batch):
-    model=baseline_model()
+def train_deep(X_train, y_train, X_test, y_test, iterations, batch):
+    model=deepmodel()
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     print(model.summary())
@@ -63,7 +87,7 @@ def train(X_train, y_train,X_test, y_test,iterations,batch):
     print("Saved model to disk")
 
 #you can predict on X using this method where positive is the label number for positive samples and negative the label for the rest.
-def predict(X,positive,negative):
+def predict_deep(X,positive,negative):
 
     json_file = open('model.json', 'r')
     loaded_model_json = json_file.read()
@@ -74,7 +98,7 @@ def predict(X,positive,negative):
     print("Loaded model from disk")
 
     # evaluate loaded model on test data
-    loaded_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    #loaded_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     y_predict=loaded_model.predict(X)
     predictor = lambda x: negative if x < 0.5 else positive
     pfunc = numpy.vectorize(predictor)
@@ -85,9 +109,12 @@ def predict(X,positive,negative):
 (X_train,y_train,X_test,y_test)=load_data()
 
 #We can train it here the model will be saved to the disk automatically, so next time when you run the code just comment this , training comes with a cost :)
-train(X_train,y_train,X_test,y_test, 1,64)
+
+train_deep(X_train,y_train,X_test,y_test, 1,64)
+train_normal(X_train,y_train,X_test,y_test)
 
 #We can just load the model from the dist and predict using it , here is a simple test to see if model is loaded correctly and accuracy comlies with result of us
 
-print(accuracy_score(predict(X_test,1,0),y_test))
 
+print(accuracy_score(predict_deep(X_test,1,0),y_test))
+print(accuracy_score(predict_normal(X_test,1,0),y_test))
