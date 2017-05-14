@@ -1,3 +1,5 @@
 .*
 twitter-datasets
 *pyc
+*.bin
+*bin.gz
