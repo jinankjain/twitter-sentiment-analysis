@@ -16,6 +16,12 @@ Resources for sentiment analysis
 
 [Random blog](http://k8si.github.io/2016/01/28/lstm-networks-for-sentiment-analysis-on-tweets.html)
 
+[DA lab's own ACL paper, Sentiment with Ensemble of CNN and ](https://www.aclweb.org/anthology/S/S16/S16-1173.pdf)
+
+[Some MSc thesis Twitter sentiment with DCNN](https://pdfs.semanticscholar.org/9320/a229b450bee8384f218681634e039acd9c2f.pdf)
+
+[Same thing, but cited as different papers O.o](http://www.aclweb.org/anthology/S/S15/S15-2.pdf#page=506)
+
 [CIL official project repo](https://github.com/dalab/lecture_cil_public/tree/master/exercises/ex6)
 
 [Ask god](http://lmgtfy.com/?q=twitter+sentiment+analysis)
