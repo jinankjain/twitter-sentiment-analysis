@@ -36,6 +36,8 @@ Resources for road segmentation
 ======
 [Kaggle blog for road segmentation using U-Net](http://blog.kaggle.com/2017/04/26/dstl-satellite-imagery-competition-1st-place-winners-interview-kyle-lee/?utm_source=Mailing%20list&utm_campaign=f1be30eedd-Kaggle_Newsletter_05-04-2017&utm_medium=email&utm_term=0_f42f9df1e1-f1be30eedd-400419961)
 
+[Another road segmentation contest](https://deepsense.io/deep-learning-for-satellite-imagery-via-image-segmentation/)
+
 Resources for Galaxy generation
 ======
 [PixelCNN OpenAI](https://github.com/openai/pixel-cnn)
