@@ -1,5 +1,9 @@
 .*
 twitter-datasets
+glove/build
+glove/cooccurrence*
+glove/vectors*
+glove/vocab.txt
 data
 *pyc
 *.bin
