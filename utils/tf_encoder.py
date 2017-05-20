@@ -33,11 +33,11 @@ class TfEncoder:
 
 
 if __name__ == "__main__":
-    voc = Vocabulary("data/vocab.pkl")
+    voc = Vocabulary("../data/vocab.pkl")
     encoder = TfEncoder(voc)
     encoder.encode(
-        "data/small_train.txt",
-        "data/tf_encoded_small_train.pkl")
+        "../data/small_train.txt",
+        "../data/tf_encoded_small_train.pkl")
 
     with open("data/tf_encoded_small_train.pkl", "rb") as f:
         enc = pickle.load(f)

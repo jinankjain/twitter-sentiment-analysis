@@ -40,7 +40,7 @@ class Vocabulary:
 
 
 if __name__ == "__main__":
-    v = Vocabulary("data/vocab.pkl")
+    v = Vocabulary("../data/vocab.pkl")
     enc = v.get_tf_encoding("something about you and me is crrrazy")
     print(np.nonzero(enc)[0])
     print(sum(enc))
