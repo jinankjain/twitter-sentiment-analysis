@@ -10,3 +10,12 @@ This is our project repository for project II of Computational Intelligence Lab 
 	- args3 -> NUM_THREADS
 
 We can tweak more parameters have a look at train.sh in glove folder
+
+## Twitter LDA
+
+- cd twitter-lda
+- ant build
+- java -cp bin TwitterLDA/TwitterLDAmain
+- Change parameters
+	- filelist_test.txt -> All the corpous
+	- modelParameters-test.txt -> model params goes here
