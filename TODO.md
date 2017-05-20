@@ -1,7 +1,8 @@
 ## Literally everything
 
 1. Code structure with CV in keras (tf backend) and add logistic regression
-2. Train 
+2. Vocbulary creation + document encoding (in diff formats) 
+3. Train 
   + GloVe 
   + Word2vec (use pretrained in beginning) 
   + LDA topic modelling
