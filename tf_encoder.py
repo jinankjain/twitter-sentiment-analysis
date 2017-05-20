@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+from scipy.sparse import coo_matrix
 from vocabulary import Vocabulary
 
 
@@ -17,10 +18,18 @@ class TfEncoder:
             encoding = list(map(self.vocab.get_tf_encoding, lines))
             print(len(encoding), encoding[0].shape)
             encoding = np.array(encoding)
-            print(encoding.shape)
+            rows, cols = np.nonzero(encoding)
+            data = encoding[rows, cols]
+
+            sparse_encoding = coo_matrix(
+                (data, (rows, cols)),
+                shape=(len(lines), self.vocab.vocab_size))
+            print(self.vocab.vocab_size)
+            print(rows.shape, cols.shape, data.shape)
+            print(sparse_encoding.shape)
 
         with open(dest_filename, "wb") as fout:
-            pickle.dump(encoding, fout)
+            pickle.dump(sparse_encoding, fout)
 
 
 if __name__ == "__main__":
@@ -33,4 +42,3 @@ if __name__ == "__main__":
     with open("data/tf_encoded_small_train.pkl", "rb") as f:
         enc = pickle.load(f)
         print(enc.shape)
-        print(np.sum(enc[:10], axis=1))
