@@ -36,8 +36,7 @@ if ! [[ -f "${DATA_DIR}/vocab.txt" ]]; then
   if [[ ${platform} == "linux" ]]; then
       cat ../twitter-datasets/train_pos.txt ../twitter-datasets/train_neg.txt | sed "s/ /\n/g" | grep -v "^\s*$" | sort | uniq -c | sort -d -n -f1 -r | head -n 20000 > ../data/vocab.txt || fail "Could not create vocab"
   else
-      cat ../twitter-datasets/train_pos.txt ../twitter-datasets/train_neg.txt |
-      sed -e 's/ /\'$'\n/g' | grep -v "^\s*$" | sort | uniq -c > ../data/vocab.txt || fail "Could not create vocab"
+      cat ../twitter-datasets/train_pos.txt ../twitter-datasets/train_neg.txt | sed -e 's/ /\'$'\n/g' | grep -v "^\s*$" | sort | uniq -c > ../data/vocab.txt || fail "Could not create vocab"
   fi
 fi
 echo "vocabulary ready"

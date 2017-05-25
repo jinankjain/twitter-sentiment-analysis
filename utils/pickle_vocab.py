@@ -4,11 +4,10 @@ import sys
 
 
 def main(root):
-    vocab = {"<unk>": 0}
+    vocab = []
     with open(root+'/vocab_trimmed.txt') as f:
-        for idx, line in enumerate(f):
-            tok = line.split()[1]
-            vocab[tok] = idx + 1
+        vocab = [line.strip().split()[1] for line in f.readlines()]
+        vocab = ["<unk>"] + vocab
 
     with open(root+'/vocab.pkl', 'wb') as f:
         pickle.dump(vocab, f)

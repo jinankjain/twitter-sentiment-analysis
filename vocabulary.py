@@ -6,10 +6,13 @@ UNK_ID = 0
 
 class Vocabulary:
     def __init__(self, filename):
+        self.sorted_vocab = []  # on position i is the token with tokID i
         self.vocab = {}  # maps tokens to tokIDs
         with open(filename, "rb") as f:
-            self.vocab = pickle.load(f)
-        self.vocab_size = len(self.vocab)
+            self.sorted_vocab = pickle.load(f)
+
+        self.vocab_size = len(self.sorted_vocab)
+        self.vocab = dict(zip(self.sorted_vocab, np.arange(self.vocab_size)))
 
         self.one_hot = {}
         for token, idx in self.vocab.items():
@@ -19,7 +22,7 @@ class Vocabulary:
 
     """
     Gets a tweet (a string) and returns a numpy array of indexes. If a token is
-    not in the vocabulary, its ID is considered to be -1.
+    not in the vocabulary, its ID is considered to be 0.
     """
     def get_tok_ids(self, text):
         return np.array([
