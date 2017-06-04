@@ -7,19 +7,19 @@ NEG = -1
 
 
 class BaseModel:
-    def __init__(self, vocab, data_source, lstm_size, drop_prob):
+    def __init__(self, vocab, data_source, lstm_size, drop_prob, seq_length):
         self.vocab = vocab
         self.data_source = data_source
 
         self.drop_prob = drop_prob
 
         # Create the embedding layer and load pretrained embeddings.
-        embedding_matrix = self.data_source.get_embeddings(
-            self.vocab)
+        embedding_matrix = self.data_source.get_embeddings()
         self.embedding_layer = Embedding(
             self.vocab.vocab_size,
             self.data_source.embedding_dim,
             weights=[embedding_matrix],
+            input_length=seq_length,
             trainable=True)
 
         self.model = None
@@ -37,6 +37,8 @@ class BaseModel:
             loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         print(self.model.summary())
 
+        print(X_train.shape)
+        print(y_train.shape)
         self.model.fit(
             X_train,
             y_train,

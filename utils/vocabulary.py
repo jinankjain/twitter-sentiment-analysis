@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 
 UNK_ID = 0
+PAD_ID = 1
 
 
 class Vocabulary:
@@ -24,10 +25,16 @@ class Vocabulary:
     Gets a tweet (a string) and returns a numpy array of indexes. If a token is
     not in the vocabulary, its ID is considered to be 0.
     """
-    def get_tok_ids(self, text):
+    def get_tok_ids(self, text, seq_length):
+        # TODO: pad up to seq_length
+        tokens = text.split()
+        pad_count = seq_length - len(tokens)
+        if len(tokens) > seq_length:
+            print("NUUUUUUUUUUUUUUUUUUU")
+            tokens = tokens[:seq_length]
         return np.array([
             self.vocab[tok] if tok in self.vocab else UNK_ID
-            for tok in text.split()])
+            for tok in tokens] + [PAD_ID] * pad_count)
 
     def get_tf_encoding(self, text):
         # Get token IDs.
