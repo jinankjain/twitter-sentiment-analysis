@@ -29,9 +29,13 @@ class Vocabulary:
         # TODO: pad up to seq_length
         tokens = text.split()
         pad_count = seq_length - len(tokens)
+
+        # XXX: currently, if a sequence is longer than seq_length, we trim it to
+        # seq_length. However, we might want to consider discarding it
+        # altogether.
         if len(tokens) > seq_length:
-            print("NUUUUUUUUUUUUUUUUUUU")
             tokens = tokens[:seq_length]
+
         return np.array([
             self.vocab[tok] if tok in self.vocab else UNK_ID
             for tok in tokens] + [PAD_ID] * pad_count)
