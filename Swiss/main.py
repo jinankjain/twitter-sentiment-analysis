@@ -93,20 +93,20 @@ with tf.Graph().as_default():
                             cnn.input_x: x_batch,
                             cnn.input_y: y_batch,
                             cnn.dropout_keep_prob: FLAGS.dropout_keep_prob}
-                    _, loss, accuracy = sess.run([train_op, cnn.loss, cnn.accuracy],feed_dict)
+                    sess.run(train_op, feed_dict)
                     
-                    print ("loss ", loss, ", acc ", accuracy)
+                    #print ("loss ", loss, ", acc ", accuracy)
                     
                     i += 1
-                    if i % FLAGS.evaluate_every_times ==0:
-                            
+                    if i % FLAGS.checkpoint_every ==0:
                             feed_dict = {
                                     cnn.input_x: x_dev,
                                     cnn.input_y: y_dev,
                                     cnn.dropout_keep_prob: 1.0}
                             loss, accuracy = sess.run([cnn.loss, cnn.accuracy],feed_dict)
-                    
                             print ("test: loss ", loss, ", acc ", accuracy)
+                            print('Saving model')
+
                 print("Loading submit data:")
                 x_submit, id_submit = load_data.get_submission_data()
                 print("making submissions")
