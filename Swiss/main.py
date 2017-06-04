@@ -46,7 +46,7 @@ print ("")
 
 # Data Preparation
 # =========================================================================================
-print ("Loading data...")
+print ("Loading data...", FLAGS.train_size)
 x_train, x_dev, y_train, y_dev, vocab_processor = load_data.get_train_data(FLAGS.train_size)
 
 print ("Vocabulary Size: ", len(vocab_processor.vocabulary_))
