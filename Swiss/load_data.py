@@ -11,9 +11,9 @@ def get_train_data(LIM=1000):
 
         # Load data from files
 
-        positive_examples = list(open("../twitter-datasets/train_pos.txt", "r").readlines())
+        positive_examples = list(open("../twitter-datasets/train_pos_full.txt", "r").readlines())
         positive_examples = [s.strip() for s in positive_examples[:LIM]]   # -1000
-        negative_examples = list(open("../twitter-datasets/train_neg.txt", "r").readlines())
+        negative_examples = list(open("../twitter-datasets/train_neg_full.txt", "r").readlines())
         negative_examples = [s.strip() for s in negative_examples[:LIM]]
 
         x_text = positive_examples + negative_examples
@@ -37,12 +37,13 @@ def get_train_data(LIM=1000):
         y_shuffled = y[shuffle_indices]
 
         # Split train/cross-validation set
-        cross_validation_indices = np.array(random.sample(list(np.arange(len(y))), int(len(y) * 0.1) ))
+        cross_validation_indices = np.array(random.sample(list(np.arange(len(y))), int(len(y) * 0.01) ))
         train_indices = np.array(list(set(np.arange(len(y))) - set(cross_validation_indices)))
 
         x_train, x_dev = x_shuffled[train_indices], x_shuffled[cross_validation_indices]
         y_train, y_dev = y_shuffled[train_indices], y_shuffled[cross_validation_indices]
 
+        print("data size", len(x_train))
         return [x_train, x_dev, y_train, y_dev, vocab_processor]
 
 def get_submission_data():
@@ -63,7 +64,7 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
 
     data = np.array(data)
     data_size = len(data)
-    num_batches_per_epoch = int(len(data)/batch_size) + 1
+    num_batches_per_epoch = int(len(data)/batch_size) 
     for epoch in range(num_epochs):
         # Shuffle the data at each epoch
         if shuffle:
