@@ -10,7 +10,7 @@ nlu vm: gpuvm@freegpu.westeurope.cloudapp.azure.com
 pwd: $sentimentKing
 ```
 
-[Keras is for kids](https://github.com/fchollet/keras-resources)
+[Keras is good, see text resources of lstm models](https://github.com/fchollet/keras-resources)
 
 [Tensorflow is okay, real men code in C](https://github.com/tensorflow/models)
 
