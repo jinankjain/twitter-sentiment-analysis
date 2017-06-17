@@ -2,6 +2,14 @@ Resources for Azure
 ======
 [Setting up Azure](http://da.inf.ethz.ch/teaching/2017/CIL/material/Infrastructure_description.pdf)
 
+```
+cil vm: cil@cil4twitter.westeurope.cloudapp.azure.com 
+pwd: alexrocks!123
+
+nlu vm: gpuvm@freegpu.westeurope.cloudapp.azure.com
+pwd: $sentimentKing
+```
+
 [Keras is for kids](https://github.com/fchollet/keras-resources)
 
 [Tensorflow is okay, real men code in C](https://github.com/tensorflow/models)
