@@ -29,8 +29,8 @@ print 'vocab_builder: building vocabularies...'
 vocabulary, vocabulary_inv = build_vocab(sentences_padded)
 
 print 'vocab_builder: writing csv...'
-voc = csv.writer(open('twitter-sentiment-dataset/vocab.csv', 'w'))
-voc_inv = csv.writer(open('twitter-sentiment-dataset/vocab_inv.csv', 'w'))
+voc = csv.writer(open('../twitter-datasets/vocab.csv', 'w'))
+voc_inv = csv.writer(open('../twitter-datasets/vocab_inv.csv', 'w'))
 
 for key, val in vocabulary.items():
     voc.writerow([key, val])

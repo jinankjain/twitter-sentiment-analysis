@@ -89,6 +89,8 @@ def evaluate_sentence(id, sentence, vocabulary):
 # Hyperparameters
 tf.flags.DEFINE_boolean('train', False,
                         'Should the network perform training? (default: False)')
+tf.flags.DEFINE_boolean('submit', True,
+                        'Should the network generate submission? (default: True)')
 tf.flags.DEFINE_boolean('save', False,
                         'Save session checkpoints (default: False)')
 tf.flags.DEFINE_boolean('save_protobuf', False,
@@ -273,12 +275,14 @@ with tf.device(device):
 if FLAGS.load is not None:
     log('Data processing OK, loading network...')
     saver = tf.train.Saver()
-    try:
-        saver.restore(sess, CHECKPOINT_FILE_PATH)
-    except:
-        log('Couldn\'t restore the session properly, falling back to default '
-            'initialization.')
-        sess.run(tf.global_variables_initializer())
+    #try:
+    log('Trying to restore')
+    log(CHECKPOINT_FILE_PATH)
+    saver.restore(sess, CHECKPOINT_FILE_PATH)
+   # except:
+        #log('Couldn\'t restore the session properly, falling back to default '
+        #    'initialization.')
+        #sess.run(tf.global_variables_initializer())
 else:
     log('Data processing OK, creating network...')
     sess.run(tf.global_variables_initializer())
@@ -431,9 +435,24 @@ if FLAGS.save_protobuf:
     tf.train.write_graph(minimal_graph, RUN_DIR, 'minimal_graph.txt',
                          as_text=True)
 
-file = open("../twitter-sentiment-analysis/data/test_data.txt", "r")
-for line in file:
-    data = line.split(',', 1)
-    tweet_id = data[0]
-    tweet_data = data[1]
-    evaluate_sentence(tweet_id, tweet_data, vocabulary)
+if FLAGS.submit:
+    log('Loading submit data')
+    submit_examples = list(open("../twitter-datasets/test_data.txt", "r").readlines())
+    submit_examples = [s.strip() for s in submit_examples]  
+    splitter = [s.split(',', 1) for s in submit_examples]
+    sentences = [s[1] for s in splitter]
+    ids = [s[0] for s in splitter]
+    #evaluate_sentence(tweet_id, tweet_data, vocabulary)
+    max_len = max(len(_) for _ in x)
+    x_to_eval = [string_to_int(sentence, vocabulary, max_len)[0] for sentence in sentences]
+    log('generating submissions data')
+    result = sess.run(tf.argmax(network_out, 1),
+                      feed_dict={data_in: x_to_eval,
+                                 dropout_keep_prob: 1.0})
+    result = ['1' if r == 1 else '-1' for r in result]
+    log('saving submissions')
+    with open("../twitter-datasets/tscnnsubmission.csv", "w") as f:
+        f.write("Id,Prediction\n")
+        for i,p in enumerate(result):
+            f.write(str(ids[i]) + "," + str(p) + "\n")
+

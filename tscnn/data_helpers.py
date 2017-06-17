@@ -4,10 +4,10 @@ import itertools
 from collections import Counter
 import random, csv
 
-POS_DATASET_PATH = 'twitter-sentiment-dataset/tw-data.pos'
-NEG_DATASET_PATH = 'twitter-sentiment-dataset/tw-data.neg'
-VOC_PATH = 'twitter-sentiment-dataset/vocab.csv'
-VOC_INV_PATH = 'twitter-sentiment-dataset/vocab_inv.csv'
+POS_DATASET_PATH = '../twitter-datasets/train_pos_full.txt'
+NEG_DATASET_PATH = '../twitter-datasets/train_neg_full.txt'
+VOC_PATH = '../twitter-datasets/vocab.csv'
+VOC_INV_PATH = '../twitter-datasets/vocab_inv.csv'
 
 
 def clean_str(string):
