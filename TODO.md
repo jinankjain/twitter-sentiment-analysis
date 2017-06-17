@@ -1,3 +1,6 @@
+## on Everything
+1. Try IMDB sentiment dataset as well
+
 ## on CNN
 1. current CNN flattens out around 85%. Make the model bigger, add more layers, see swisscheese
 2. Validation accuracy same as accuracy here, so validate on 5-10%
