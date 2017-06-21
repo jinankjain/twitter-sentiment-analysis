@@ -9,6 +9,7 @@ import numpy as np
 from utils.vocabulary import Vocabulary
 
 DROPOUT = 0.2
+EMB_LEN = 200
 LSTM_SIZE = 1024
 SEQ_LEN = 40
 
@@ -51,8 +52,8 @@ if __name__ == "__main__":
         vocab=vocab,
         labeled_data_file="data/small_train.txt",
         test_data_file="data/test_data.txt",
-        embedding_file="data/glove.twitter.27B.25d.txt",
-        embedding_dim=25,
+        embedding_file="data/glove.twitter.27B.{0}d.txt".format(EMB_LEN),
+        embedding_dim=EMB_LEN,
         seq_length=SEQ_LEN)
 
     model = VanillaLSTMModel(vocab, data_source, LSTM_SIZE, DROPOUT)
