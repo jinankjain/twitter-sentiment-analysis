@@ -2,7 +2,7 @@ from base_data_source import BaseDataSource
 import numpy as np
 import random
 
-TRAIN_RATIO = 0.8  # the rest is used as validation set
+TRAIN_RATIO = 0.9  # the rest is used as validation set
 
 
 class DataSource(BaseDataSource):
