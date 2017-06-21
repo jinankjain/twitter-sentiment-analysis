@@ -1,9 +1,14 @@
+from keras.callbacks import ModelCheckpoint
 from keras.layers import Embedding
 # from keras.layers.embeddings import Embedding
 from keras.models import model_from_json
+from keras.utils.np_utils import to_categorical
+
+import numpy as np
 
 POS = 1
 NEG = -1
+CKPT_DIR = "data/checkpoints/"
 
 
 class BaseModel:
@@ -27,32 +32,43 @@ class BaseModel:
     """
     This method should create a keras model.
     """
-    def create_model(self):
+    def create_model(self, ckpt_file=None):
         raise NotImplementedError("Please implement this method")
 
     def train(self, num_epochs, batch_size):
         X_train, y_train = self.data_source.train()
+        X_val, y_val = self.data_source.validation()
+
+        y_train = to_categorical((y_train + 1) / 2, num_classes=2)
+        y_val = to_categorical((y_val + 1) / 2, num_classes=2)
 
         self.model.compile(
-            loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+            loss='categorical_crossentropy',
+            optimizer='adam',
+            metrics=['accuracy'])
         print(self.model.summary())
 
         print(X_train.shape)
         print(y_train.shape)
+
+        checkpoint = ModelCheckpoint(
+            filepath=CKPT_DIR+'vanilla_lstm_ckpt-{epoch:02d}-{val_loss:.2f}.hdf5')
         self.model.fit(
             X_train,
             y_train,
+            validation_data=(X_val, y_val),
             epochs=num_epochs,
             batch_size=batch_size,
-            verbose=1)
-
-        # TODO: save the model at the end of training
+            verbose=1,
+            callbacks=[checkpoint])
 
     """
     Evaluate the model on the validation set.
     """
     def eval(self):
         X, y = self.data_source.validation()
+        y = to_categorical((y + 1) / 2, num_classes=2)
+
         scores = self.model.evaluate(X, y, verbose=0)
         print("Accuracy: %.2f%%" % (scores[1]*100))
 
@@ -61,8 +77,9 @@ class BaseModel:
     """
     def predict(self):
         X = self.data_source.test()
-        y_predict = self.model.predict(X)
-        print(y_predict)
+        y_predict = np.argmax(self.model.predict(X), axis=1)
+        y_predict = y_predict * 2 - 1
+
         return y_predict
 
     """

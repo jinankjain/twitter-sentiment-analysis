@@ -47,7 +47,6 @@ class DataSource(BaseDataSource):
         embedding_dict = {}
         with open(embedding_file, "r") as f:
             content = [line.strip().split(" ") for line in f.readlines()]
-            print(content[:10])
             embedding_dict = dict(
                 (l[0], [float(x) for x in l[1:]]) for l in content)
         print("Loaded embeddings")
@@ -97,8 +96,6 @@ class DataSource(BaseDataSource):
 
     def test(self, num_samples=None):
         if num_samples is None:
-            num_samples = self._test[0].shape[0]
+            num_samples = self._test.shape[0]
 
-        return (
-            self._test[0][:num_samples],
-            self._test[1][:num_samples])
+        return self._test[:num_samples]
