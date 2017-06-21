@@ -19,7 +19,7 @@ NUM_EPOCHS = 2
 BATCH_SIZE = 64
 
 # Convolutional Layer Params
-KERNEL_SIZE = 5
+KERNEL_SIZE = 3
 FILTERS = 64
 POOL_SIZE = 4
 CONV_DROP = 0.25
