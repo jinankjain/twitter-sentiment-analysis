@@ -1,4 +1,5 @@
 from keras.callbacks import ModelCheckpoint
+from saverCallback import SubmissionGenerator
 from keras.layers import Embedding
 # from keras.layers.embeddings import Embedding
 from keras.models import model_from_json
@@ -53,6 +54,7 @@ class BaseModel:
 
         checkpoint = ModelCheckpoint(
             filepath=CKPT_DIR+'vanilla_lstm_ckpt-{epoch:02d}-{val_loss:.2f}.hdf5')
+	submitter = SubmissionGenerator()
         self.model.fit(
             X_train,
             y_train,
@@ -60,7 +62,7 @@ class BaseModel:
             epochs=num_epochs,
             batch_size=batch_size,
             verbose=1,
-            callbacks=[checkpoint])
+            callbacks=[checkpoint, submitter])
 
     """
     Evaluate the model on the validation set.

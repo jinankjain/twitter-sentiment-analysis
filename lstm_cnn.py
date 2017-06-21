@@ -15,11 +15,11 @@ DROPOUT = 0.2
 LSTM_SIZE = 1024
 SEQ_LEN = 40
 
-NUM_EPOCHS = 20
+NUM_EPOCHS = 2
 BATCH_SIZE = 64
 
 # Convolutional Layer Params
-KERNEL_SIZE = 5
+KERNEL_SIZE = 3
 FILTERS = 64
 POOL_SIZE = 4
 CONV_DROP = 0.25
@@ -66,8 +66,8 @@ if __name__ == "__main__":
         vocab=vocab,
         labeled_data_file="data/small_train.txt",
         test_data_file="data/test_data.txt",
-        embedding_file="data/glove.twitter.27B.25d.txt",
-        embedding_dim=25,
+        embedding_file="data/glove.twitter.27B.200d.txt",
+        embedding_dim=200,
         seq_length=SEQ_LEN)
 
     model = LSTMCNN(vocab, data_source, LSTM_SIZE, DROPOUT)

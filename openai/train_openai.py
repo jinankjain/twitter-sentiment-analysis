@@ -19,7 +19,7 @@ encoder = Model()
 def log(*s):
     print("TRAIN_OPENAI:", s)
 
-def old_baseline_model():
+def baseline_model():
 	# create model
     model = Sequential()
     model.add(Dense(4096, input_shape=(4096,), init='lecun_uniform'))
@@ -29,7 +29,7 @@ def old_baseline_model():
 
     return model
 
-def baseline_model():
+def new_baseline_model():
 	# create model
     model = Sequential()
     model.add(Dense(4096, input_shape=(4096,), init='glorot_normal', activation='relu'))
@@ -57,7 +57,7 @@ def train(num_epochs):
                   optimizer=Adam(),
                   metrics=['accuracy'])
 
-    datasource = DataSource("../data/small_train.txt", 20000)
+    datasource = DataSource("../data/full_train.txt", 20000)
 
     with K.get_session():
         for oi in range(num_epochs):
@@ -68,7 +68,7 @@ def train(num_epochs):
             x_train, y_train, x_test, y_test = datasource.make_cvset(x, y, 0.1)
             bm.fit(x_train, y_train, batch_size=256, epochs=1, verbose=1, 
                     validation_data=(x_test, y_test), shuffle=False)
-            if (oi + 1) % 5 == 0:
+            if (oi + 1) % 30 == 0:
                 log("saving model")
                 model_json = bm.to_json()
                 with open("output/" + str(oi) + ".json", "w") as json_file:
