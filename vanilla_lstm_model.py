@@ -16,6 +16,8 @@ SEQ_LEN = 40
 NUM_EPOCHS = 20
 BATCH_SIZE = 64
 
+TRAIN_FILE = "data/full_train.txt"
+
 
 class VanillaLSTMModel(BaseModel):
     def __init__(self, vocab, data_source, lstm_size=LSTM_SIZE,
@@ -50,7 +52,7 @@ if __name__ == "__main__":
     vocab = Vocabulary("data/vocab.pkl")
     data_source = DataSource(
         vocab=vocab,
-        labeled_data_file="data/small_train.txt",
+        labeled_data_file=TRAIN_FILE,
         test_data_file="data/test_data.txt",
         embedding_file="data/glove.twitter.27B.{0}d.txt".format(EMB_LEN),
         embedding_dim=EMB_LEN,
@@ -63,12 +65,12 @@ if __name__ == "__main__":
         model.train(NUM_EPOCHS, BATCH_SIZE)
     else:
         model.create_model(args.ckpt_file)
-        print("Evaluating on validation set...")
-        model.eval()
+#         print("Evaluating on validation set...")
+#         model.eval()
 
         print("Predicting labels on test set...")
         y_test = model.predict()
         with open("data/test_output.txt", "w") as f:
             f.write("Id,Prediction\n")
             for idx, y in zip(np.arange(y_test.shape[0]), y_test):
-                f.write(str(idx) + "," + str(y) + "\n")
+                f.write(str(idx+1) + "," + str(y) + "\n")
