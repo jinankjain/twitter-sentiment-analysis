@@ -9,10 +9,10 @@ import numpy as np
 from utils.vocabulary import Vocabulary
 
 DROPOUT = 0.2
-LSTM_SIZE = 100
+LSTM_SIZE = 1024
 SEQ_LEN = 40
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 BATCH_SIZE = 64
 
 
