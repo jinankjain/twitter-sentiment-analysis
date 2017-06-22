@@ -19,6 +19,10 @@ class BaseModel:
 
         self.drop_prob = drop_prob
 
+        # Create checkpoint folder if not present
+        if not os.path.exists(CKPT_DIR):
+            os.mkdir(CKPT_DIR)
+
         # Create the embedding layer and load pretrained embeddings.
         embedding_matrix = self.data_source.get_embeddings()
         self.embedding_layer = Embedding(
