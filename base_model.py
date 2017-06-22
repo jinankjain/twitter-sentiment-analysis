@@ -1,7 +1,5 @@
 from keras.callbacks import ModelCheckpoint
-# from saverCallback import SubmissionGenerator
 from keras.layers import Embedding
-# from keras.layers.embeddings import Embedding
 from keras.models import model_from_json
 from keras.utils.np_utils import to_categorical
 
@@ -9,6 +7,7 @@ import numpy as np
 
 POS = 1
 NEG = -1
+STEPS_PER_CKPT = 200000
 CKPT_DIR = "data/checkpoints/"
 
 
@@ -38,11 +37,9 @@ class BaseModel:
     def create_model(self, ckpt_file=None):
         raise NotImplementedError("Please implement this method")
 
-    def train(self, num_epochs, batch_size):
-        X_train, y_train = self.data_source.train()
+    def train(self, batch_size):
         X_val, y_val = self.data_source.validation()
 
-        y_train = to_categorical((y_train + 1) / 2, num_classes=2)
         y_val = to_categorical((y_val + 1) / 2, num_classes=2)
 
         self.model.compile(
@@ -51,20 +48,20 @@ class BaseModel:
             metrics=['accuracy'])
         print(self.model.summary())
 
-        print(X_train.shape)
-        print(y_train.shape)
-
         checkpoint = ModelCheckpoint(
             filepath=CKPT_DIR+self.arch+'_lstm_ckpt-{epoch:02d}-{val_loss:.2f}.hdf5')
-#         submitter = SubmissionGenerator()
-        self.model.fit(
-            X_train,
-            y_train,
-            validation_data=(X_val, y_val),
-            epochs=num_epochs,
-            batch_size=batch_size,
-            verbose=1,
-            callbacks=[checkpoint])
+        while True:
+            curr_X_train, curr_y_train = self.data_source.next_train_batch(
+                STEPS_PER_CKPT)
+            curr_y_train = to_categorical((curr_y_train + 1) / 2, num_classes=2)
+            self.model.fit(
+                curr_X_train,
+                curr_y_train,
+                validation_data=(X_val, y_val),
+                epochs=1,
+                batch_size=batch_size,
+                verbose=1,
+                callbacks=[checkpoint])
 
     """
     Evaluate the model on the validation set.

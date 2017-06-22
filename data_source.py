@@ -16,6 +16,8 @@ class DataSource(BaseDataSource):
         self.embedding_dim = embedding_dim
         self.seq_length = seq_length
 
+        self.start = 0
+
         # Read labeled data.
         with open(labeled_data_file, "r") as f:
             content = [line.strip().split(" ", 1) for line in f.readlines()]
@@ -99,3 +101,16 @@ class DataSource(BaseDataSource):
             num_samples = self._test.shape[0]
 
         return self._test[:num_samples]
+
+    def next_train_batch(self, num_samples=None):
+        num_train = self._train[0].shape[0]
+        X = self._train[0][self.start:self.start+num_samples]
+        y = self._train[1][self.start:self.start+num_samples]
+
+        self.start = (self.start + num_samples) % num_train
+
+        if X.shape[0] < num_samples:
+            X = np.concatenate((X, self._train[0][:self.start]))
+            y = np.concatenate((y, self._train[1][:self.start]))
+
+        return (X, y)

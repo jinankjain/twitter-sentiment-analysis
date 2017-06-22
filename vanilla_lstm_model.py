@@ -15,7 +15,6 @@ DROPOUT = 0.2
 LSTM_SIZE = 1024
 SEQ_LEN = 40
 
-NUM_EPOCHS = 20
 BATCH_SIZE = 64
 
 
@@ -105,7 +104,7 @@ if __name__ == "__main__":
 
     if args.is_train:
         model.create_model()
-        model.train(NUM_EPOCHS, BATCH_SIZE)
+        model.train(BATCH_SIZE)
     else:
         model.create_model(args.ckpt_file)
 #         print("Evaluating on validation set...")
