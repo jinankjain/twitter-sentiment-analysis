@@ -1,4 +1,5 @@
 import argparse
+import h5py
 from base_model import BaseModel
 from data_source import DataSource
 from keras.layers import Dense
