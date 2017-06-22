@@ -5,6 +5,7 @@ from keras.optimizers import RMSprop, Adam
 from keras.utils.np_utils import to_categorical
 
 import numpy as np
+import os
 
 POS = 1
 NEG = -1
@@ -47,10 +48,10 @@ class BaseModel:
 
         y_val = to_categorical((y_val + 1) / 2, num_classes=2)
 
-#         opt = Adam(lr=0.001)
-#         opt_name = "adam"
-        opt = RMSprop(lr=0.001, decay=0.95)
-        opt_name = "RMSP"
+        opt = Adam(lr=0.001)
+        opt_name = "adam"
+#         opt = RMSprop(lr=0.001, decay=0.95)
+#         opt_name = "RMSP"
         self.model.compile(
             loss='categorical_crossentropy',
             optimizer=opt,
