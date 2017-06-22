@@ -1,13 +1,14 @@
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Embedding
 from keras.models import model_from_json
+from keras.optimizers import RMSprop, Adam
 from keras.utils.np_utils import to_categorical
 
 import numpy as np
 
 POS = 1
 NEG = -1
-STEPS_PER_CKPT = 200000
+STEPS_PER_CKPT = 400000
 CKPT_DIR = "data/checkpoints/"
 
 
@@ -42,15 +43,21 @@ class BaseModel:
 
         y_val = to_categorical((y_val + 1) / 2, num_classes=2)
 
+#         opt = Adam(lr=0.001)
+#         opt_name = "adam"
+        opt = RMSprop(lr=0.001, decay=0.95)
+        opt_name = "RMSP"
         self.model.compile(
             loss='categorical_crossentropy',
-            optimizer='adam',
+            optimizer=opt,
             metrics=['accuracy'])
         print(self.model.summary())
 
-        checkpoint = ModelCheckpoint(
-            filepath=CKPT_DIR+self.arch+'_lstm_ckpt-{epoch:02d}-{val_loss:.2f}.hdf5')
+        iteration = 0
         while True:
+            checkpoint = ModelCheckpoint(
+                filepath=CKPT_DIR + self.arch + '_lstm_' + opt_name + \
+                        '_ckpt-' + str(iteration) + '-{val_loss:.2f}.hdf5')
             curr_X_train, curr_y_train = self.data_source.next_train_batch(
                 STEPS_PER_CKPT)
             curr_y_train = to_categorical((curr_y_train + 1) / 2, num_classes=2)
@@ -62,6 +69,7 @@ class BaseModel:
                 batch_size=batch_size,
                 verbose=1,
                 callbacks=[checkpoint])
+            iteration += STEPS_PER_CKPT
 
     """
     Evaluate the model on the validation set.
