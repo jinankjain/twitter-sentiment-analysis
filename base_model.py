@@ -1,5 +1,5 @@
 from keras.callbacks import ModelCheckpoint
-from saverCallback import SubmissionGenerator
+# from saverCallback import SubmissionGenerator
 from keras.layers import Embedding
 # from keras.layers.embeddings import Embedding
 from keras.models import model_from_json
@@ -13,7 +13,8 @@ CKPT_DIR = "data/checkpoints/"
 
 
 class BaseModel:
-    def __init__(self, vocab, data_source, lstm_size, drop_prob, seq_length):
+    def __init__(self, vocab, data_source, lstm_size, drop_prob, seq_length,
+                 arch):
         self.vocab = vocab
         self.data_source = data_source
 
@@ -29,6 +30,7 @@ class BaseModel:
             trainable=True)
 
         self.model = None
+        self.arch = arch
 
     """
     This method should create a keras model.
@@ -53,8 +55,8 @@ class BaseModel:
         print(y_train.shape)
 
         checkpoint = ModelCheckpoint(
-            filepath=CKPT_DIR+'vanilla_lstm_ckpt-{epoch:02d}-{val_loss:.2f}.hdf5')
-	submitter = SubmissionGenerator()
+            filepath=CKPT_DIR+self.arch+'_lstm_ckpt-{epoch:02d}-{val_loss:.2f}.hdf5')
+#         submitter = SubmissionGenerator()
         self.model.fit(
             X_train,
             y_train,
@@ -62,7 +64,7 @@ class BaseModel:
             epochs=num_epochs,
             batch_size=batch_size,
             verbose=1,
-            callbacks=[checkpoint, submitter])
+            callbacks=[checkpoint])
 
     """
     Evaluate the model on the validation set.

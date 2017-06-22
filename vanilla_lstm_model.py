@@ -11,33 +11,29 @@ import numpy as np
 from utils.vocabulary import Vocabulary
 
 DROPOUT = 0.2
-EMB_LEN = 200
 LSTM_SIZE = 1024
 SEQ_LEN = 40
 
 NUM_EPOCHS = 20
 BATCH_SIZE = 64
 
-TRAIN_FILE = "data/full_train.txt"
-
 
 class VanillaLSTMModel(BaseModel):
     def __init__(self, vocab, data_source, lstm_size=LSTM_SIZE,
-                 drop_prob=DROPOUT, seq_length=SEQ_LEN, lstm_arch='vanilla'):
+                 drop_prob=DROPOUT, seq_length=SEQ_LEN, arch=None):
         BaseModel.__init__(self, vocab, data_source, lstm_size, drop_prob,
-                           seq_length)
-        self.lstm_arch = lstm_arch
+                           seq_length, arch)
 
     def create_model(self, ckpt_file=None):
         if ckpt_file is None:
             self.model = Sequential()
             self.model.add(self.embedding_layer)
 
-            if self.lstm_arch == "vanilla":
+            if self.arch == "vanilla":
                 self.model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
                                     recurrent_dropout=self.drop_prob,
                                     implementation=2, unroll=True))
-            elif self.lstm_arch == "multi_layer":
+            elif self.arch == "multi_layer":
                 # Two LSTM layers.
                 self.model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
                                     recurrent_dropout=self.drop_prob,
@@ -51,12 +47,14 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(512, activation='relu'))
                 self.model.add(Dropout(2*DROPOUT))
-            elif self.lstm_arch == "bidi":
+            elif self.arch == "bidi":
                 lstm_layer = LSTM(LSTM_SIZE, dropout=self.drop_prob,
                                   recurrent_dropout=self.drop_prob,
-                                  implementation=2, unroll=True,
-                                  return_sequences=True)
+                                  implementation=2, unroll=True)
                 self.model.add(Bidirectional(lstm_layer, merge_mode='sum'))
+            else:
+                raise NotImplementedError("Architecture is not implemented:",
+                                          self.arch)
 
             self.model.add(Dense(2, activation='softmax'))
 
@@ -72,11 +70,16 @@ if __name__ == "__main__":
     parser.add_argument('--is_eval', dest='is_train', action='store_false')
     parser.add_argument('--ckpt_file', type=str, default=None, nargs="?",
                         help='Path to checkpoint file')
-    parser.add_argument('--vanilla', type=str, dest='lstm_arch',
+    parser.add_argument('--train_file', type=str,
+                        default="data/small_train.txt",
+                        help='Path to training set file')
+    parser.add_argument('--emb_len', type=int, default=200,
+                        help='Dimension of Glove embeddings.')
+    parser.add_argument('--vanilla', dest='lstm_arch',
                         action='store_const', const='vanilla')
-    parser.add_argument('--bidi', type=str, dest='lstm_arch',
+    parser.add_argument('--bidi', dest='lstm_arch',
                         action='store_const', const='bidi')
-    parser.add_argument('--multi_layer', type=str, dest='lstm_arch',
+    parser.add_argument('--multi_layer', dest='lstm_arch',
                         action='store_const', const='multi_layer')
 
     args = parser.parse_args()
@@ -84,14 +87,20 @@ if __name__ == "__main__":
     vocab = Vocabulary("data/vocab.pkl")
     data_source = DataSource(
         vocab=vocab,
-        labeled_data_file=TRAIN_FILE,
+        labeled_data_file=args.train_file,
         test_data_file="data/test_data.txt",
-        embedding_file="data/glove.twitter.27B.{0}d.txt".format(EMB_LEN),
-        embedding_dim=EMB_LEN,
+        embedding_file="data/glove.twitter.27B.{0}d.txt".format(args.emb_len),
+        embedding_dim=args.emb_len,
         seq_length=SEQ_LEN)
 
-    model = VanillaLSTMModel(vocab, data_source, LSTM_SIZE, DROPOUT,
-                             args.lstm_arch)
+    print("ARCH", args.lstm_arch)
+
+    model = VanillaLSTMModel(
+        vocab=vocab,
+        data_source=data_source,
+        lstm_size=LSTM_SIZE,
+        drop_prob=DROPOUT,
+        arch=args.lstm_arch)
 
     if args.is_train:
         model.create_model()
