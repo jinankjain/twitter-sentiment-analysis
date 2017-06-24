@@ -2,10 +2,14 @@ import argparse
 import h5py
 from base_model import BaseModel
 from data_source import DataSource
+from keras.layers import Concatenate
 from keras.layers import Dense
 from keras.layers import Dropout
+from keras.layers import Embedding
+from keras.layers import Input
 from keras.layers import LSTM
 from keras.layers.wrappers import Bidirectional
+from keras.models import Model
 from keras.models import Sequential
 from keras.models import load_model
 import numpy as np
@@ -33,6 +37,41 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
                                     recurrent_dropout=self.drop_prob,
                                     implementation=2, unroll=True))
+
+                self.model.add(Dense(2, activation='softmax'))
+            elif self.arch == "ensamble":
+                temp_model = Sequential()
+                temp_model.add(self.embedding_layer)
+                temp_model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
+                                    recurrent_dropout=self.drop_prob,
+                                    implementation=2, unroll=True))
+
+                first_input = Input(shape=(self.embedding_layer.input_dim,))
+                first_model = temp_model(first_input)
+                second_input = Input(shape=(4096,))
+
+                openai_model = Sequential()
+                openai_model.add(Embedding(
+                    4096,
+                    self.embedding_layer.output_dim,
+                    input_length=4096))
+                second_model = openai_model(second_input)
+
+                result = Sequential()
+                # Add 3 fully-connected layers.
+                result.add(Dense(2048, activation='relu'))
+                result.add(Dropout(2*DROPOUT))
+                result.add(Dense(1024, activation='relu'))
+                result.add(Dropout(2*DROPOUT))
+                result.add(Dense(512, activation='relu'))
+                result.add(Dropout(2*DROPOUT))
+
+                result.add(Dense(2, activation='softmax'))
+                final = result(Concatenate(first_model, second_model))
+                result = Model(
+                    inputs=[first_input, second_input],
+                    outputs=[final])
+                self.model = result
             elif self.arch == "multi_layer":
                 # Two LSTM layers.
                 self.model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
@@ -47,16 +86,18 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(512, activation='relu'))
                 self.model.add(Dropout(2*DROPOUT))
+
+                self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "bidi":
                 lstm_layer = LSTM(LSTM_SIZE, dropout=self.drop_prob,
                                   recurrent_dropout=self.drop_prob,
                                   implementation=2, unroll=True)
                 self.model.add(Bidirectional(lstm_layer, merge_mode='sum'))
+
+                self.model.add(Dense(2, activation='softmax'))
             else:
                 raise NotImplementedError("Architecture is not implemented:",
                                           self.arch)
-
-            self.model.add(Dense(2, activation='softmax'))
 
             # TODO: maybe try to do pooling over hidden states like here:
             # http://deeplearning.net/tutorial/lstm.html
