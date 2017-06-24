@@ -114,6 +114,9 @@ if __name__ == "__main__":
     parser.add_argument('--train_file', type=str,
                         default="data/small_train.txt",
                         help='Path to training set file')
+    parser.add_argument('--loss', type=str,
+                        default="categorical_crossentropy",
+                        help='Loss function to be used')
     parser.add_argument('--emb_len', type=int, default=200,
                         help='Dimension of Glove embeddings.')
     parser.add_argument('--vanilla', dest='lstm_arch',
@@ -147,7 +150,7 @@ if __name__ == "__main__":
 
     if args.is_train:
         model.create_model()
-        model.train(BATCH_SIZE)
+        model.train(batch_size=BATCH_SIZE, loss=args.loss)
     else:
         model.create_model(args.ckpt_file)
 #         print("Evaluating on validation set...")

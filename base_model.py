@@ -43,7 +43,7 @@ class BaseModel:
     def create_model(self, ckpt_file=None):
         raise NotImplementedError("Please implement this method")
 
-    def train(self, batch_size):
+    def train(self, batch_size, loss='categorical_crossentropy'):
         X_val, y_val = self.data_source.validation()
 
         y_val = to_categorical((y_val + 1) / 2, num_classes=2)
@@ -53,7 +53,7 @@ class BaseModel:
 #         opt = RMSprop(lr=0.001, decay=0.95)
 #         opt_name = "RMSP"
         self.model.compile(
-            loss='categorical_crossentropy',
+            loss=loss,
             optimizer=opt,
             metrics=['accuracy'])
         print(self.model.summary())
