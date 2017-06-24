@@ -1,13 +1,14 @@
 from base_data_source import BaseDataSource
 import numpy as np
 import random
+import gensim
 
 TRAIN_RATIO = 0.9  # the rest is used as validation set
 
 
 class DataSource(BaseDataSource):
     def __init__(self, vocab, labeled_data_file, test_data_file,
-                 embedding_file, embedding_dim, seq_length):
+                 embedding_file, embedding_dim, seq_length, embedding_type):
         self._train = None
         self._validation = None
         self._test = None
@@ -45,36 +46,64 @@ class DataSource(BaseDataSource):
                                    for s in content])
         print("Loaded test set")
 
-        # Read embeddings.
-        embedding_dict = {}
-        with open(embedding_file, "r") as f:
-            content = [line.strip().split(" ") for line in f.readlines()]
-            embedding_dict = dict(
-                (l[0], [float(x) for x in l[1:]]) for l in content)
-        print("Loaded embeddings")
+        if embedding_type == "glove":
+            # Read embeddings.
+            embedding_dict = {}
+            with open(embedding_file, "r") as f:
+                content = [line.strip().split(" ") for line in f.readlines()]
+                embedding_dict = dict(
+                    (l[0], [float(x) for x in l[1:]]) for l in content)
+            print("Loaded embeddings")
 
-        # Construct the embedding matrix. Row i has the embedding for the token
-        # with tokID i.
-        self.embedding_matrix = []
-        for i in np.arange(self.vocab.vocab_size):
-            token = self.vocab.sorted_vocab[i]
+            # Construct the embedding matrix. Row i has the embedding for the token
+            # with tokID i.
+            self.embedding_matrix = []
+            for i in np.arange(self.vocab.vocab_size):
+                token = self.vocab.sorted_vocab[i]
 
-            # TODO: Figure out what to do with "<unk>". Currently not in the
-            # pretrained embeddings.
+                # TODO: Figure out what to do with "<unk>". Currently not in the
+                # pretrained embeddings.
 
-            # TODO: Maybe figure out what to do with tokens that appear in our
-            # vocabulary, but don't appear in the word embeddings.
-            # XXX: currently we insert a random embedding for words that are not
-            # in the embedding matrix, but what we could do is ignore these
-            # words when we create the vocabulary.
-            if token not in embedding_dict:
-                self.embedding_matrix.append([
-                    random.random()
-                    for i in np.arange(self.embedding_dim)])
-            else:
-                self.embedding_matrix.append(embedding_dict[token])
+                # TODO: Maybe figure out what to do with tokens that appear in our
+                # vocabulary, but don't appear in the word embeddings.
+                # XXX: currently we insert a random embedding for words that are not
+                # in the embedding matrix, but what we could do is ignore these
+                # words when we create the vocabulary.
+                if token not in embedding_dict:
+                    self.embedding_matrix.append([
+                        random.random()
+                        for i in np.arange(self.embedding_dim)])
+                else:
+                    self.embedding_matrix.append(embedding_dict[token])
 
-        self.embedding_matrix = np.array(self.embedding_matrix)
+            self.embedding_matrix = np.array(self.embedding_matrix)
+        elif embedding_type == "word2vec":
+            print("Loading word2vec")
+            # Read embeddings.
+            model =  gensim.models.KeyedVectors.load_word2vec_format('data/word2vec.bin', binary=True, unicode_errors='ignore')
+            # Construct the embedding matrix. Row i has the embedding for the token
+            # with tokID i.
+            self.embedding_matrix = []
+            for i in np.arange(self.vocab.vocab_size):
+                token = self.vocab.sorted_vocab[i]
+
+                # TODO: Figure out what to do with "<unk>". Currently not in the
+                # pretrained embeddings.
+
+                # TODO: Maybe figure out what to do with tokens that appear in our
+                # vocabulary, but don't appear in the word embeddings.
+                # XXX: currently we insert a random embedding for words that are not
+                # in the embedding matrix, but what we could do is ignore these
+                # words when we create the vocabulary.
+                if token not in model:
+                    self.embedding_matrix.append([
+                        random.random()
+                        for i in np.arange(self.embedding_dim)])
+                else:
+                    self.embedding_matrix.append(model[token])
+
+            self.embedding_matrix = np.array(self.embedding_matrix)
+            
         print("Contructed embedding matrix")
 
     def get_embeddings(self):

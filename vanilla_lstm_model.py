@@ -81,7 +81,8 @@ if __name__ == "__main__":
                         action='store_const', const='bidi')
     parser.add_argument('--multi_layer', dest='lstm_arch',
                         action='store_const', const='multi_layer')
-
+    parser.add_argument('--embedding_type', type=str, default="glove", nargs="?",
+                        help='Type of word embedding Word2Vec or Glove')
     args = parser.parse_args()
 
     vocab = Vocabulary("data/vocab.pkl")
@@ -91,7 +92,8 @@ if __name__ == "__main__":
         test_data_file="data/test_data.txt",
         embedding_file="data/glove.twitter.27B.{0}d.txt".format(args.emb_len),
         embedding_dim=args.emb_len,
-        seq_length=SEQ_LEN)
+        seq_length=SEQ_LEN,
+        embedding_type=args.embedding_type)
 
     print("ARCH", args.lstm_arch)
 
