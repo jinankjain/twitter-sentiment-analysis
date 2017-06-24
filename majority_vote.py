@@ -2,7 +2,7 @@ import os
 
 
 DATA_SOURCE = "data"
-FILES = ["lstm.txt", "openai.csv", "cnn.csv"]
+FILES = ["lstm.txt", "openai.csv", "cnn.csv", "multi.txt", "bidi.txt"]
 
 result = []
 
