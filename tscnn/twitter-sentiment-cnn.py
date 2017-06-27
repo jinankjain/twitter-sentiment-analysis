@@ -13,7 +13,7 @@ from tqdm import tqdm
 def log(*string, **kwargs):
     output = ' '.join(string)
     if kwargs.pop('verbose', True):
-        print output
+        print(output)
     LOG_FILE.write(''.join(['\n', output]))
 
 
@@ -143,7 +143,7 @@ else:
     CHECKPOINT_FILE_PATH = os.path.abspath(os.path.join(RUN_DIR, 'ckpt.ckpt'))
     os.mkdir(RUN_DIR)
 SUMMARY_DIR = os.path.join(RUN_DIR, 'summaries')
-LOG_FILE = open(LOG_FILE_PATH, 'a', 0)
+LOG_FILE = open(LOG_FILE_PATH, 'a')
 
 
 log('======================= START! ========================')
@@ -166,7 +166,7 @@ y_train, y_test = y_shuffled[:-test_index], y_shuffled[-test_index:]
 sequence_length = x_train.shape[1]
 num_classes = y_train.shape[1]
 vocab_size = len(vocabulary)
-filter_sizes = map(int, FLAGS.filter_sizes.split(','))
+filter_sizes = list(map(int, FLAGS.filter_sizes.split(',')))
 validate_every = len(y_train) / (FLAGS.batch_size * FLAGS.valid_freq)
 checkpoint_every = len(y_train) / (FLAGS.batch_size * FLAGS.checkpoint_freq)
 
@@ -178,7 +178,7 @@ else:
 
 # Log run data
 log('\nFlags:')
-for attr, value in sorted(FLAGS.__flags.iteritems()):
+for attr, value in sorted(FLAGS.__flags.items()):
     log('\t%s = %s' % (attr, value))
 log('\nDataset:')
 log('\tTrain set size = %d\n'
