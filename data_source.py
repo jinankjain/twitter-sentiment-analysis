@@ -4,11 +4,13 @@ import random
 import gensim
 
 TRAIN_RATIO = 0.9  # the rest is used as validation set
+OPENAI_SAMPLES_PER_BATCH = 10000
 
 
 class DataSource(BaseDataSource):
     def __init__(self, vocab, labeled_data_file, test_data_file,
-                 embedding_file, embedding_dim, seq_length, embedding_type):
+                 embedding_file, embedding_dim, seq_length, embedding_type,
+                 openai_features_dir=None):
         self._train = None
         self._validation = None
         self._test = None
@@ -16,6 +18,9 @@ class DataSource(BaseDataSource):
         self.vocab = vocab
         self.embedding_dim = embedding_dim
         self.seq_length = seq_length
+
+        self.openai_features_dir = openai_features_dir
+        self.curr_openai_batch = None
 
         self.start = 0
 
@@ -103,7 +108,7 @@ class DataSource(BaseDataSource):
                     self.embedding_matrix.append(model[token])
 
             self.embedding_matrix = np.array(self.embedding_matrix)
-            
+
         print("Contructed embedding matrix")
 
     def get_embeddings(self):
@@ -131,8 +136,29 @@ class DataSource(BaseDataSource):
 
         return self._test[:num_samples]
 
-    def next_train_batch(self, num_samples=None):
+    def next_train_batch(self, num_samples=None, with_openai_features=False):
         num_train = self._train[0].shape[0]
+
+        openai_features = None
+        if with_openai_features:
+            if self.curr_openai_batch is None:
+                # Load first batch.
+                self.curr_openai_batch = np.load(
+                        self.openai_features_dir+"X0.npy")
+
+            openai_features = self.curr_openai_batch[self.start:self.start+num_samples]
+            if openai_features.shape[0] < num_samples:
+                # Load next OpenAI batch (i.e. 10000 samples).
+                next_start = (self.start + num_samples) % num_train
+                next_batch_id = next_start / OPENAI_SAMPLES_PER_BATCH
+                self.curr_openai_batch = np.load(
+                        self.openai_features_dir+"X"+next_batch_id+".npy")
+
+                # Load the rest of the samples.
+                num_rest = (self.start + num_samples) % OPENAI_SAMPLES_PER_BATCH
+                openai_features = np.concatenate((
+                    openai_features, self.curr_openai_batch[:num_rest]))
+
         X = self._train[0][self.start:self.start+num_samples]
         y = self._train[1][self.start:self.start+num_samples]
 
@@ -142,4 +168,7 @@ class DataSource(BaseDataSource):
             X = np.concatenate((X, self._train[0][:self.start]))
             y = np.concatenate((y, self._train[1][:self.start]))
 
-        return (X, y)
+        if openai_features is None:
+            return (X, y)
+        else:
+            return (X, y, openai_features)

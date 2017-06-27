@@ -19,6 +19,7 @@ DROPOUT = 0.2
 LSTM_SIZE = 1024
 SEQ_LEN = 40
 
+OPENAI_FEATURE_SIZE = 4096
 BATCH_SIZE = 64
 
 
@@ -48,13 +49,13 @@ class VanillaLSTMModel(BaseModel):
 
                 first_input = Input(shape=(self.embedding_layer.input_dim,))
                 first_model = temp_model(first_input)
-                second_input = Input(shape=(4096,))
 
+                second_input = Input(shape=(OPENAI_FEATURE_SIZE,))
                 openai_model = Sequential()
                 openai_model.add(Embedding(
-                    4096,
+                    OPENAI_FEATURE_SIZE,
                     self.embedding_layer.output_dim,
-                    input_length=4096))
+                    input_length=OPENAI_FEATURE_SIZE))
                 second_model = openai_model(second_input)
 
                 result = Sequential()
@@ -125,6 +126,8 @@ if __name__ == "__main__":
                         action='store_const', const='bidi')
     parser.add_argument('--multi_layer', dest='lstm_arch',
                         action='store_const', const='multi_layer')
+    parser.add_argument('--ensamble', dest='lstm_arch',
+                        action='store_const', const='ensamble')
     parser.add_argument('--embedding_type', type=str, default="glove", nargs="?",
                         help='Type of word embedding Word2Vec or Glove')
     args = parser.parse_args()
@@ -137,7 +140,8 @@ if __name__ == "__main__":
         embedding_file="data/glove.twitter.27B.{0}d.txt".format(args.emb_len),
         embedding_dim=args.emb_len,
         seq_length=SEQ_LEN,
-        embedding_type=args.embedding_type)
+        embedding_type=args.embedding_type,
+        openai_features_dir="/mnt/ds3lab/tifreaa/openai_features/")
 
     print("ARCH", args.lstm_arch)
 

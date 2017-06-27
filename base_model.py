@@ -63,11 +63,23 @@ class BaseModel:
             checkpoint = ModelCheckpoint(
                 filepath=CKPT_DIR + self.arch + '_lstm_' + opt_name + \
                         '_ckpt-' + str(iteration) + '-{val_loss:.2f}.hdf5')
-            curr_X_train, curr_y_train = self.data_source.next_train_batch(
-                STEPS_PER_CKPT)
+            curr_X_train, curr_y_train, openai_features = None, None, None
+            if self.arch is not "ensamble":
+                curr_X_train, curr_y_train = self.data_source.next_train_batch(
+                    STEPS_PER_CKPT)
+            else:
+                curr_X_train, curr_y_train, openai_features = self.data_source.next_train_batch(
+                    STEPS_PER_CKPT, with_openai_features=True)
             curr_y_train = to_categorical((curr_y_train + 1) / 2, num_classes=2)
+
+            input_X = None
+            if self.arch is not "ensamble":
+                input_X = curr_X_train
+            else:
+                input_X = [curr_X_train, openai_features]
+
             self.model.fit(
-                curr_X_train,
+                input_X,
                 curr_y_train,
                 validation_data=(X_val, y_val),
                 epochs=1,

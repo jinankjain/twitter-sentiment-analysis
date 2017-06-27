@@ -1,4 +1,5 @@
 .*
+*.npy
 twitter-datasets
 glove/build
 glove/cooccurrence*

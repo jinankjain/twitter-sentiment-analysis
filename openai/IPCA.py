@@ -1,15 +1,16 @@
 from encoder import Model
 import numpy as np
 import pickle
-from sklearn.decomposition import IncrementalPCA
-positive= list(open("train_pos_full.txt", "r",encoding='utf8').readlines())
-negative = list(open("train_neg_full.txt", "r",encoding='utf8').readlines())
+# from sklearn.decomposition import IncrementalPCA
+
+positive= list(open("../data/twitter-datasets/train_pos_full.txt", "r",encoding='utf8').readlines())
+negative = list(open("../data/twitter-datasets/train_neg_full.txt", "r",encoding='utf8').readlines())
 print(np.shape(positive))
 print(np.shape(negative))
 model=Model()
-ipca = IncrementalPCA(n_components=500)
+# ipca = IncrementalPCA(n_components=500)
 
-for i in range(0,250):
+for i in range(73,250):
     print(i)
 
     positive_examples = [s.strip() for s in positive[(i) * 5000:(i + 1) * 5000]]  # -1000
@@ -27,10 +28,10 @@ for i in range(0,250):
     print(np.shape(x_text))
     print(np.shape(y))
     x = model.transform(x_text)
-    np.save("X"+ str(i)+".npy",x)
-    np.save("Y" + str(i) + ".npy", y)
+    np.save("/mnt/ds3lab/tifreaa/openai_features/X"+ str(i)+".npy",x)
+    np.save("/mnt/ds3lab/tifreaa/openai_features/Y" + str(i) + ".npy", y)
     print(np.shape(x))
-    ipca.partial_fit(x)
+#     ipca.partial_fit(x)
 
-pickle.dump(ipca, open("pca", 'wb'))
+# pickle.dump(ipca, open("pca", 'wb'))
 
