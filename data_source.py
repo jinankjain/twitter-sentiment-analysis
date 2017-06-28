@@ -3,10 +3,9 @@ import numpy as np
 import random
 import gensim
 
-# TRAIN_RATIO = 0.9  # the rest is used as validation set
-VALIDATION_SIZE = 10000
+VALIDATION_SIZE = 50000
 OPENAI_SAMPLES_PER_BATCH = 10000
-OPENAI_BATCHES = 250
+OPENAI_BATCHES = 20
 OPENAI_TRAIN_BATCHES = OPENAI_BATCHES - int(VALIDATION_SIZE / OPENAI_SAMPLES_PER_BATCH)
 
 
@@ -49,13 +48,17 @@ class DataSource(BaseDataSource):
             if self.openai_features_dir is not None:
                 num_val_openai_batches = OPENAI_BATCHES - OPENAI_TRAIN_BATCHES
                 # Load last batch.
+                print("[OpenAI] Validation batch", OPENAI_BATCHES-1)
                 validation_openai_features = np.load(
                         self.openai_features_dir+"X" + str(OPENAI_BATCHES-1) + ".npy")
                 i = 1
                 while i < num_val_openai_batches:
-                    validation_openai_features = np.concatenate(
+                    print("[OpenAI] Validation batch", OPENAI_BATCHES-1-i)
+                    openai_batch = np.load(
+                            self.openai_features_dir+"X"+str(OPENAI_BATCHES-1-i)+".npy")
+                    validation_openai_features = np.concatenate((
                             validation_openai_features,
-                            np.load(self.openai_features_dir+"X"+str(OPENAI_BATCHES-1-i)+".npy"))
+                            openai_batch))
                     i += 1
 
                 self._validation = (
@@ -170,6 +173,7 @@ class DataSource(BaseDataSource):
         if with_openai_features:
             if self.curr_openai_batch is None:
                 # Load first batch.
+                print("[OpenAI] Train batch", 0)
                 self.curr_openai_batch = np.load(
                         self.openai_features_dir+"X0.npy")
 
@@ -180,6 +184,7 @@ class DataSource(BaseDataSource):
 
                 # Load next OpenAI batch (i.e. 10000 samples).
                 self.curr_openai_batch_id = (self.curr_openai_batch_id + 1) % OPENAI_TRAIN_BATCHES
+                print("[OpenAI] Train batch", self.curr_openai_batch_id)
                 self.curr_openai_batch = np.load(
                         self.openai_features_dir+"X"+
                         str(self.curr_openai_batch_id)+".npy")

@@ -21,6 +21,7 @@ LSTM_SIZE = 1024
 SEQ_LEN = 40
 
 OPENAI_FEATURE_SIZE = 4096
+OPENAI_REDUCED_SIZE = 512
 BATCH_SIZE = 64
 
 
@@ -51,7 +52,7 @@ class VanillaLSTMModel(BaseModel):
                 print("Created first model")
 
                 branch2 = Sequential()
-                branch2.add(Dense(self.embedding_layer.output_dim,
+                branch2.add(Dense(OPENAI_REDUCED_SIZE,
                     activation="linear", input_shape=(OPENAI_FEATURE_SIZE,)))
                 print("Created second model")
 
