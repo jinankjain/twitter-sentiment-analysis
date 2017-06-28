@@ -28,8 +28,8 @@ class BaseModel:
         # Create the embedding layer and load pretrained embeddings.
         embedding_matrix = self.data_source.get_embeddings()
         self.embedding_layer = Embedding(
-            self.vocab.vocab_size,
-            self.data_source.embedding_dim,
+            input_dim=self.vocab.vocab_size,
+            output_dim=self.data_source.embedding_dim,
             weights=[embedding_matrix],
             input_length=seq_length,
             trainable=True)
@@ -44,7 +44,11 @@ class BaseModel:
         raise NotImplementedError("Please implement this method")
 
     def train(self, batch_size, loss='categorical_crossentropy'):
-        X_val, y_val = self.data_source.validation()
+        X_val, y_val, openai_features = None, None, None
+        if self.arch is not "ensamble":
+            X_val, y_val = self.data_source.validation()
+        else:
+            X_val, y_val, openai_features = self.data_source.validation()
 
         y_val = to_categorical((y_val + 1) / 2, num_classes=2)
 

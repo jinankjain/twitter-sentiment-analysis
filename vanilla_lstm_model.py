@@ -2,7 +2,7 @@ import argparse
 import h5py
 from base_model import BaseModel
 from data_source import DataSource
-from keras.layers import Concatenate
+from keras.layers import concatenate
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import Embedding
@@ -31,16 +31,16 @@ class VanillaLSTMModel(BaseModel):
 
     def create_model(self, ckpt_file=None):
         if ckpt_file is None:
-            self.model = Sequential()
-            self.model.add(self.embedding_layer)
-
             if self.arch == "vanilla":
+                self.model = Sequential()
+                self.model.add(self.embedding_layer)
                 self.model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
                                     recurrent_dropout=self.drop_prob,
                                     implementation=2, unroll=True))
 
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "ensamble":
+                print("Start")
                 temp_model = Sequential()
                 temp_model.add(self.embedding_layer)
                 temp_model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
@@ -48,21 +48,24 @@ class VanillaLSTMModel(BaseModel):
                                     implementation=2, unroll=True))
 
                 first_input = Input(shape=(self.embedding_layer.input_dim,))
+                print("GATA PANA AICI", temp_model)
                 first_model = temp_model(first_input)
                 print("Created first model")
 
                 second_input = Input(shape=(OPENAI_FEATURE_SIZE,))
                 openai_model = Sequential()
                 openai_model.add(Embedding(
-                    OPENAI_FEATURE_SIZE,
-                    self.embedding_layer.output_dim,
-                    input_length=OPENAI_FEATURE_SIZE))
+                    input_dim=OPENAI_FEATURE_SIZE,
+                    output_dim=self.embedding_layer.output_dim,
+                    input_length=OPENAI_FEATURE_SIZE,
+                    trainable=True))
                 second_model = openai_model(second_input)
                 print("Created second model")
 
                 result = Sequential()
                 # Add 3 fully-connected layers.
-                result.add(Dense(2048, activation='relu'))
+                input_len = LSTM_SIZE + self.embedding_layer.output_dim
+                result.add(Dense(2048, input_shape=(input_len,), activation='relu'))
                 result.add(Dropout(2*DROPOUT))
                 result.add(Dense(1024, activation='relu'))
                 result.add(Dropout(2*DROPOUT))
@@ -70,12 +73,14 @@ class VanillaLSTMModel(BaseModel):
                 result.add(Dropout(2*DROPOUT))
 
                 result.add(Dense(2, activation='softmax'))
-                final = result(Concatenate(first_model, second_model))
+                final = result(concatenate([first_model, second_model]))
                 result = Model(
                     inputs=[first_input, second_input],
                     outputs=[final])
                 self.model = result
             elif self.arch == "multi_layer":
+                self.model = Sequential()
+                self.model.add(self.embedding_layer)
                 # Two LSTM layers.
                 self.model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
                                     recurrent_dropout=self.drop_prob,
@@ -92,6 +97,8 @@ class VanillaLSTMModel(BaseModel):
 
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "bidi":
+                self.model = Sequential()
+                self.model.add(self.embedding_layer)
                 lstm_layer = LSTM(LSTM_SIZE, dropout=self.drop_prob,
                                   recurrent_dropout=self.drop_prob,
                                   implementation=2, unroll=True)
@@ -135,6 +142,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     vocab = Vocabulary("data/vocab.pkl")
+    openai_features_dir = None
+    if args.lstm_arch == "ensamble":
+        openai_features_dir = "/mnt/ds3lab/tifreaa/openai_features/"
+
     data_source = DataSource(
         vocab=vocab,
         labeled_data_file=args.train_file,
@@ -143,7 +154,7 @@ if __name__ == "__main__":
         embedding_dim=args.emb_len,
         seq_length=SEQ_LEN,
         embedding_type=args.embedding_type,
-        openai_features_dir="/mnt/ds3lab/tifreaa/openai_features/")
+        openai_features_dir=openai_features_dir)
 
     print("ARCH", args.lstm_arch)
 
