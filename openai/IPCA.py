@@ -10,7 +10,7 @@ print(np.shape(negative))
 model=Model()
 # ipca = IncrementalPCA(n_components=500)
 
-for i in range(73,250):
+for i in range(72,73):
     print(i)
 
     positive_examples = [s.strip() for s in positive[(i) * 5000:(i + 1) * 5000]]  # -1000
