@@ -8,6 +8,7 @@ from keras.layers import Dropout
 from keras.layers import Embedding
 from keras.layers import Input
 from keras.layers import LSTM
+from keras.layers import Merge
 from keras.layers.wrappers import Bidirectional
 from keras.models import Model
 from keras.models import Sequential
@@ -41,43 +42,30 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "ensamble":
                 print("Start")
-                temp_model = Sequential()
-                temp_model.add(self.embedding_layer)
-                temp_model.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
-                                    recurrent_dropout=self.drop_prob,
-                                    implementation=2, unroll=True))
+                branch1 = Sequential()
+                branch1.add(self.embedding_layer)
+                branch1.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
+                                 recurrent_dropout=self.drop_prob,
+                                 implementation=2, unroll=True))
 
-                first_input = Input(shape=(self.embedding_layer.input_dim,))
-                print("GATA PANA AICI", temp_model)
-                first_model = temp_model(first_input)
                 print("Created first model")
 
-                second_input = Input(shape=(OPENAI_FEATURE_SIZE,))
-                openai_model = Sequential()
-                openai_model.add(Embedding(
-                    input_dim=OPENAI_FEATURE_SIZE,
-                    output_dim=self.embedding_layer.output_dim,
-                    input_length=OPENAI_FEATURE_SIZE,
-                    trainable=True))
-                second_model = openai_model(second_input)
+                branch2 = Sequential()
+                branch2.add(Dense(self.embedding_layer.output_dim,
+                    activation="linear", input_shape=(OPENAI_FEATURE_SIZE,)))
                 print("Created second model")
 
-                result = Sequential()
+                self.model = Sequential()
+                self.model.add(Merge([branch1, branch2], mode='concat'))
                 # Add 3 fully-connected layers.
-                input_len = LSTM_SIZE + self.embedding_layer.output_dim
-                result.add(Dense(2048, input_shape=(input_len,), activation='relu'))
-                result.add(Dropout(2*DROPOUT))
-                result.add(Dense(1024, activation='relu'))
-                result.add(Dropout(2*DROPOUT))
-                result.add(Dense(512, activation='relu'))
-                result.add(Dropout(2*DROPOUT))
+                self.model.add(Dense(2048, activation='relu'))
+                self.model.add(Dropout(2*DROPOUT))
+                self.model.add(Dense(1024, activation='relu'))
+                self.model.add(Dropout(2*DROPOUT))
+                self.model.add(Dense(512, activation='relu'))
+                self.model.add(Dropout(2*DROPOUT))
 
-                result.add(Dense(2, activation='softmax'))
-                final = result(concatenate([first_model, second_model]))
-                result = Model(
-                    inputs=[first_input, second_input],
-                    outputs=[final])
-                self.model = result
+                self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "multi_layer":
                 self.model = Sequential()
                 self.model.add(self.embedding_layer)

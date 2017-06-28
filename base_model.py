@@ -9,7 +9,7 @@ import os
 
 POS = 1
 NEG = -1
-STEPS_PER_CKPT = 400000
+STEPS_PER_CKPT = 20000
 CKPT_DIR = "data/checkpoints/"
 
 
@@ -81,6 +81,7 @@ class BaseModel:
                 input_X = curr_X_train
             else:
                 input_X = [curr_X_train, openai_features]
+            print(input_X)
 
             self.model.fit(
                 input_X,

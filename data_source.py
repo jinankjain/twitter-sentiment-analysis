@@ -22,6 +22,7 @@ class DataSource(BaseDataSource):
 
         self.openai_features_dir = openai_features_dir
         self.curr_openai_batch = None
+        self.curr_openai_batch_id = 0
 
         self.start = 0
 
@@ -162,15 +163,16 @@ class DataSource(BaseDataSource):
                         self.openai_features_dir+"X0.npy")
 
             openai_features = self.curr_openai_batch[self.start:self.start+num_samples]
-            if openai_features.shape[0] < num_samples:
+            while openai_features.shape[0] < num_samples:
+                num_rest = num_samples - openai_features.shape[0]
+
                 # Load next OpenAI batch (i.e. 10000 samples).
-                next_start = (self.start + num_samples) % num_train
-                next_batch_id = next_start / OPENAI_SAMPLES_PER_BATCH
+                self.curr_openai_batch_id += 1
                 self.curr_openai_batch = np.load(
-                        self.openai_features_dir+"X"+next_batch_id+".npy")
+                        self.openai_features_dir+"X"+
+                        str(self.curr_openai_batch_id)+".npy")
 
                 # Load the rest of the samples.
-                num_rest = (self.start + num_samples) % OPENAI_SAMPLES_PER_BATCH
                 openai_features = np.concatenate((
                     openai_features, self.curr_openai_batch[:num_rest]))
 
@@ -186,4 +188,5 @@ class DataSource(BaseDataSource):
         if openai_features is None:
             return (X, y)
         else:
+            print(X.shape, openai_features.shape)
             return (X, y, openai_features)
