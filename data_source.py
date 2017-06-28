@@ -52,6 +52,7 @@ class DataSource(BaseDataSource):
                     labeled_data[0][num_train:],
                     labeled_data[1][num_train:],
                     validation_openai_features)
+                print(self._validation[2].shape)
         print("Loaded training set and validation set")
 
         # Read test data.
@@ -188,5 +189,4 @@ class DataSource(BaseDataSource):
         if openai_features is None:
             return (X, y)
         else:
-            print(X.shape, openai_features.shape)
             return (X, y, openai_features)

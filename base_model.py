@@ -9,7 +9,7 @@ import os
 
 POS = 1
 NEG = -1
-STEPS_PER_CKPT = 20000
+STEPS_PER_CKPT = 200000
 CKPT_DIR = "data/checkpoints/"
 
 
@@ -48,7 +48,7 @@ class BaseModel:
         if self.arch is not "ensamble":
             X_val, y_val = self.data_source.validation()
         else:
-            X_val, y_val, openai_features = self.data_source.validation()
+            X_val, y_val, val_openai_features = self.data_source.validation()
 
         y_val = to_categorical((y_val + 1) / 2, num_classes=2)
 
@@ -76,17 +76,19 @@ class BaseModel:
                     STEPS_PER_CKPT, with_openai_features=True)
             curr_y_train = to_categorical((curr_y_train + 1) / 2, num_classes=2)
 
-            input_X = None
+            input_X, val_X = None, None
             if self.arch is not "ensamble":
                 input_X = curr_X_train
+                val_X = X_val
             else:
                 input_X = [curr_X_train, openai_features]
-            print(input_X)
+                val_X = [X_val, val_openai_features]
+            print(input_X[0].shape, input_X[1].shape)
 
             self.model.fit(
                 input_X,
                 curr_y_train,
-                validation_data=(X_val, y_val),
+                validation_data=(val_X, y_val),
                 epochs=1,
                 batch_size=batch_size,
                 verbose=1,
