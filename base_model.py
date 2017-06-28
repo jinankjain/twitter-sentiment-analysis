@@ -20,6 +20,7 @@ class BaseModel:
         self.data_source = data_source
 
         self.drop_prob = drop_prob
+        self.seq_length = seq_length
 
         # Create checkpoint folder if not present
         if not os.path.exists(CKPT_DIR):
