@@ -58,12 +58,12 @@ class VanillaLSTMModel(BaseModel):
                 self.model = Sequential()
                 self.model.add(Merge([branch1, branch2], mode='concat'))
                 # Add 3 fully-connected layers.
-                self.model.add(Dense(2048, activation='relu'))
-                self.model.add(Dropout(2*DROPOUT))
+#                 self.model.add(Dense(2048, activation='relu'))
+#                 self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(1024, activation='relu'))
                 self.model.add(Dropout(2*DROPOUT))
-                self.model.add(Dense(512, activation='relu'))
-                self.model.add(Dropout(2*DROPOUT))
+#                 self.model.add(Dense(512, activation='relu'))
+#                 self.model.add(Dropout(2*DROPOUT))
 
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "multi_layer":

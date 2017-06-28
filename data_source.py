@@ -6,6 +6,8 @@ import gensim
 # TRAIN_RATIO = 0.9  # the rest is used as validation set
 VALIDATION_SIZE = 10000
 OPENAI_SAMPLES_PER_BATCH = 10000
+OPENAI_BATCHES = 250
+OPENAI_TRAIN_BATCHES = OPENAI_BATCHES - int(VALIDATION_SIZE / OPENAI_SAMPLES_PER_BATCH)
 
 
 class DataSource(BaseDataSource):
@@ -45,9 +47,17 @@ class DataSource(BaseDataSource):
                 labeled_data[0][num_train:],
                 labeled_data[1][num_train:])
             if self.openai_features_dir is not None:
+                num_val_openai_batches = OPENAI_BATCHES - OPENAI_TRAIN_BATCHES
                 # Load last batch.
                 validation_openai_features = np.load(
-                        self.openai_features_dir+"X249.npy")
+                        self.openai_features_dir+"X" + str(OPENAI_BATCHES-1) + ".npy")
+                i = 1
+                while i < num_val_openai_batches:
+                    validation_openai_features = np.concatenate(
+                            validation_openai_features,
+                            np.load(self.openai_features_dir+"X"+str(OPENAI_BATCHES-1-i)+".npy"))
+                    i += 1
+
                 self._validation = (
                     labeled_data[0][num_train:],
                     labeled_data[1][num_train:],
@@ -164,16 +174,16 @@ class DataSource(BaseDataSource):
                         self.openai_features_dir+"X0.npy")
 
             openai_features = self.curr_openai_batch[self.start:self.start+num_samples]
+            # Load the rest of the samples.
             while openai_features.shape[0] < num_samples:
                 num_rest = num_samples - openai_features.shape[0]
 
                 # Load next OpenAI batch (i.e. 10000 samples).
-                self.curr_openai_batch_id += 1
+                self.curr_openai_batch_id = (self.curr_openai_batch_id + 1) % OPENAI_TRAIN_BATCHES
                 self.curr_openai_batch = np.load(
                         self.openai_features_dir+"X"+
                         str(self.curr_openai_batch_id)+".npy")
 
-                # Load the rest of the samples.
                 openai_features = np.concatenate((
                     openai_features, self.curr_openai_batch[:num_rest]))
 
