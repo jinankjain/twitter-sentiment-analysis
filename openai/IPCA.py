@@ -34,4 +34,3 @@ for i in range(73,250):
 #     ipca.partial_fit(x)
 
 # pickle.dump(ipca, open("pca", 'wb'))
-

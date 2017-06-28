@@ -3,7 +3,8 @@ import numpy as np
 import random
 import gensim
 
-TRAIN_RATIO = 0.9  # the rest is used as validation set
+# TRAIN_RATIO = 0.9  # the rest is used as validation set
+VALIDATION_SIZE = 10000
 OPENAI_SAMPLES_PER_BATCH = 10000
 
 
@@ -33,7 +34,7 @@ class DataSource(BaseDataSource):
                           for s in content]),
                 np.array([int(s[0]) for s in content]))
 
-            num_train = int(len(content) * TRAIN_RATIO)
+            num_train = len(content) - VALIDATION_SIZE
             self._train = (
                 labeled_data[0][:num_train],
                 labeled_data[1][:num_train])
@@ -42,6 +43,14 @@ class DataSource(BaseDataSource):
             self._validation = (
                 labeled_data[0][num_train:],
                 labeled_data[1][num_train:])
+            if self.openai_features_dir is not None:
+                # Load last batch.
+                validation_openai_features = np.load(
+                        self.openai_features_dir+"X249.npy")
+                self._validation = (
+                    labeled_data[0][num_train:],
+                    labeled_data[1][num_train:],
+                    validation_openai_features)
         print("Loaded training set and validation set")
 
         # Read test data.
@@ -49,6 +58,12 @@ class DataSource(BaseDataSource):
             content = [line.strip().split(",", 1)[1] for line in f.readlines()]
             self._test = np.array([self.vocab.get_tok_ids(s, self.seq_length)
                                    for s in content])
+
+            if self.openai_features_dir is not None:
+                # Load test batch.
+                test_openai_features = np.load(
+                        self.openai_features_dir+"test_X.npy")
+                self._test = (self._test, test_openai_features)
         print("Loaded test set")
 
         if embedding_type == "glove":
@@ -124,7 +139,7 @@ class DataSource(BaseDataSource):
 
     def validation(self, num_samples=None):
         if num_samples is None:
-            num_samples = self._validation[0].shape[0]
+            return self._validation
 
         return (
             self._validation[0][:num_samples],
@@ -132,7 +147,7 @@ class DataSource(BaseDataSource):
 
     def test(self, num_samples=None):
         if num_samples is None:
-            num_samples = self._test.shape[0]
+            return self._test
 
         return self._test[:num_samples]
 

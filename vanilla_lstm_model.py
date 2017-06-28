@@ -49,6 +49,7 @@ class VanillaLSTMModel(BaseModel):
 
                 first_input = Input(shape=(self.embedding_layer.input_dim,))
                 first_model = temp_model(first_input)
+                print("Created first model")
 
                 second_input = Input(shape=(OPENAI_FEATURE_SIZE,))
                 openai_model = Sequential()
@@ -57,6 +58,7 @@ class VanillaLSTMModel(BaseModel):
                     self.embedding_layer.output_dim,
                     input_length=OPENAI_FEATURE_SIZE))
                 second_model = openai_model(second_input)
+                print("Created second model")
 
                 result = Sequential()
                 # Add 3 fully-connected layers.
@@ -151,9 +153,11 @@ if __name__ == "__main__":
         lstm_size=LSTM_SIZE,
         drop_prob=DROPOUT,
         arch=args.lstm_arch)
+    print("Initialized model")
 
     if args.is_train:
         model.create_model()
+        print("Created model. Starting training.")
         model.train(batch_size=BATCH_SIZE, loss=args.loss)
     else:
         model.create_model(args.ckpt_file)

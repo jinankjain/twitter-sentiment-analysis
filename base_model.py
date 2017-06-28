@@ -92,18 +92,33 @@ class BaseModel:
     Evaluate the model on the validation set.
     """
     def eval(self):
-        X, y = self.data_source.validation()
+        X, y, openai_features = None, None, None
+        if self.arch is not "ensamble":
+            X, y = self.data_source.validation()
+        else:
+            X, y, openai_features = self.data_source.validation()
         y = to_categorical((y + 1) / 2, num_classes=2)
 
-        scores = self.model.evaluate(X, y, verbose=0)
+        if self.arch is not "ensamble":
+            scores = self.model.evaluate(X, y, verbose=0)
+        else:
+            scores = self.model.evaluate([X, openai_features], y, verbose=0)
         print("Accuracy: %.2f%%" % (scores[1]*100))
 
     """
     Get the predictions of the model on a test set.
     """
     def predict(self):
-        X = self.data_source.test()
-        y_predict = np.argmax(self.model.predict(X), axis=1)
+        X, openai_features = None, None
+        if self.arch is not "ensamble":
+            X = self.data_source.test()
+        else:
+            X, openai_features = self.data_source.test()
+        if self.arch is not "ensamble":
+            y_predict = np.argmax(self.model.predict(X), axis=1)
+        else:
+            y_predict = np.argmax(
+                    self.model.predict([X, openai_features]), axis=1)
         y_predict = y_predict * 2 - 1
 
         return y_predict
