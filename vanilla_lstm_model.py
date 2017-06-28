@@ -53,7 +53,11 @@ class VanillaLSTMModel(BaseModel):
                     conv_filters[-1].add(self.embedding_layer)
                     conv_filters[-1].add(Conv1D(filters=self.num_filters, kernel_size=self.filter_sizes[0], 
                                           strides=1, padding='valid', activation='relu')(self.model))
-                    conv_filters[-1].add(MaxPooling1D(pool_size=(self.seq_length)))
+                    conv_filters[-1].add(MaxPooling1D(pool_size=(self.seq_length - filter_size + 1)))
+                self.model = Sequential()
+                self.model.add(Merge(conv_filters, mode='concat'))
+                self.model.add(Dropout(2*DROPOUT))
+                self.model.add(Dense(2, activation='softmax'))
 
 
             elif self.arch == "ensamble":
