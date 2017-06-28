@@ -4,8 +4,8 @@ import itertools
 from collections import Counter
 import random, csv
 
-DATA_DIR='/cluster/scratch/shekhars'
-#DATA_DIR='..'
+#DATA_DIR='/cluster/scratch/shekhars'
+DATA_DIR='..'
 #POS_DATASET_PATH = DATA_DIR + '/twitter-datasets/train_pos_full.txt'
 #NEG_DATASET_PATH = DATA_DIR + '/twitter-datasets/train_neg_full.txt'
 POS_DATASET_PATH = DATA_DIR + '/twitter-datasets/train_pos.txt'
