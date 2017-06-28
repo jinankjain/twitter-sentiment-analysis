@@ -8,6 +8,9 @@ from keras.layers import Dropout
 from keras.layers import Embedding
 from keras.layers import Input
 from keras.layers import LSTM
+from keras.layers import Conv1D
+from keras.layers import Conv2D
+from keras.layers import MaxPooling1D
 from keras.layers import Merge
 from keras.layers.wrappers import Bidirectional
 from keras.models import Model
@@ -30,6 +33,8 @@ class VanillaLSTMModel(BaseModel):
                  drop_prob=DROPOUT, seq_length=SEQ_LEN, arch=None):
         BaseModel.__init__(self, vocab, data_source, lstm_size, drop_prob,
                            seq_length, arch)
+                self.filter_sizes = [3, 4, 5]
+                self.num_filters = 128
 
     def create_model(self, ckpt_file=None):
         if ckpt_file is None:
@@ -41,6 +46,16 @@ class VanillaLSTMModel(BaseModel):
                                     implementation=2, unroll=True))
 
                 self.model.add(Dense(2, activation='softmax'))
+            elif self.arch == "conv":
+                conv_filters = []
+                for filter_size in self.filters:
+                    conv_filters.append(Sequential())
+                    conv_filters[-1].add(self.embedding_layer)
+                    conv_filters[-1].add(Conv1D(filters=self.num_filters, kernel_size=self.filter_sizes[0], 
+                                          strides=1, padding='valid', activation='relu')(self.model))
+                    conv_filters[-1].add(MaxPooling1D(pool_size=(self.seq_length)))
+
+
             elif self.arch == "ensamble":
                 print("Start")
                 branch1 = Sequential()

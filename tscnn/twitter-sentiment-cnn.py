@@ -208,6 +208,7 @@ with tf.device(device):
         W = tf.Variable(tf.random_uniform([vocab_size, FLAGS.embedding_size],
                                           -1.0, 1.0),
                         name='embedding_matrix')
+        print("data_in", data_in.shape)
         embedded_chars = tf.nn.embedding_lookup(W, data_in)
         embedded_chars_expanded = tf.expand_dims(embedded_chars, -1)
 
@@ -222,11 +223,13 @@ with tf.device(device):
                             FLAGS.num_filters]
             W = weight_variable(filter_shape, name='W_conv')
             b = bias_variable([FLAGS.num_filters], name='b_conv')
+            print("embedd", embedded_chars_expanded.shape)
             conv = tf.nn.conv2d(embedded_chars_expanded,
                                 W,
                                 strides=[1, 1, 1, 1],
                                 padding='VALID',
                                 name='conv')
+            print("conv", conv.shape)
             # Activation function
             h = tf.nn.relu(tf.nn.bias_add(conv, b), name='relu')
             # Maxpooling layer
@@ -239,12 +242,15 @@ with tf.device(device):
                                     strides=[1, 1, 1, 1],
                                     padding='VALID',
                                     name='pool')
+            print("pool", pooled.shape)
         pooled_outputs.append(pooled)
 
     # Combine the pooled feature tensors
     num_filters_total = FLAGS.num_filters * len(filter_sizes)
     h_pool = tf.concat(pooled_outputs, 3)
+    print("hpool", h_pool.shape)
     h_pool_flat = tf.reshape(h_pool, [-1, num_filters_total])
+    print("hpoolflat", h_pool_flat.shape)
 
     # Dropout
     with tf.name_scope('dropout'):
@@ -298,10 +304,10 @@ tf.summary.merge_all()
 # Training
 if FLAGS.train:
     # Batches
-    batches = batch_iter(zip(x_train, y_train), FLAGS.batch_size, FLAGS.epochs)
+    batches = batch_iter(list(zip(x_train, y_train)), FLAGS.batch_size, FLAGS.epochs)
 
-    test_batches = list(batch_iter(zip(x_test, y_test), FLAGS.batch_size, 1))
-    my_batch = batches.next()  # To use with human_readable_output()
+    test_batches = list(batch_iter(list(zip(x_test, y_test)), FLAGS.batch_size, 1))
+    my_batch = next(batches)  # To use with human_readable_output()
 
     # Pretty-printing variables
     global_step = 0
