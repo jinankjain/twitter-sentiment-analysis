@@ -33,8 +33,8 @@ class VanillaLSTMModel(BaseModel):
                  drop_prob=DROPOUT, seq_length=SEQ_LEN, arch=None):
         BaseModel.__init__(self, vocab, data_source, lstm_size, drop_prob,
                            seq_length, arch)
-                self.filter_sizes = [3, 4, 5]
-                self.num_filters = 128
+        self.filter_sizes = [3, 4, 5]
+        self.num_filters = 128
 
     def create_model(self, ckpt_file=None):
         if ckpt_file is None:
@@ -51,14 +51,44 @@ class VanillaLSTMModel(BaseModel):
                 for filter_size in self.filters:
                     conv_filters.append(Sequential())
                     conv_filters[-1].add(self.embedding_layer)
-                    conv_filters[-1].add(Conv1D(filters=self.num_filters, kernel_size=self.filter_sizes[0], 
-                                          strides=1, padding='valid', activation='relu')(self.model))
+                    conv_filters[-1].add(Conv1D(filters=self.num_filters, kernel_size=filter_size, 
+                                          strides=1, padding='valid', activation='relu'))
                     conv_filters[-1].add(MaxPooling1D(pool_size=(self.seq_length - filter_size + 1)))
                 self.model = Sequential()
                 self.model.add(Merge(conv_filters, mode='concat'))
                 self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(2, activation='softmax'))
+            elif self.arch == "conv2":
+                # https://github.com/fchollet/keras/issues/233
+                # input: 2D tensor of integer indices of characters (eg. 1-57). 
+                # input tensor has shape (samples, maxlen)
+                self.model = Sequential()
+                self.model.add(self.embedding_layer)
+                #self.model.add(Embedding(max_features, 256)) # embed into dense 3D float tensor (samples, maxlen, 256)
+                self.model.add(Reshape(1, maxlen, self.data_source.embedding_dim)) # reshape into 4D tensor (samples, 1, maxlen, 256)
+                # VGG-like convolution stack
+                self.model.add(Convolution2D(32, 3, 3, 3, border_mode='full')) 
+                self.model.add(Activation('relu'))
+                self.model.add(Convolution2D(32, 32, 3, 3))
+                self.model.add(Activation('relu'))
+                self.model.add(MaxPooling2D(poolsize=(2, 2)))
+                self.model.add(Dropout(0.25))
+                self.model.add(Flatten())
+                self.model.add(Dropout(2*DROPOUT))
+                self.model.add(Dense(2, activation='softmax'))
+            elif self.arch == "swisscheese":
+                self.model = Sequential()
+                filter_size = 3
+                self.model.add(self.embedding_layer)
+                self.model.add(Conv1D(filters=self.num_filters, kernel_size=filter_size, 
+                                        strides=1, padding='valid', activation='relu'))
+                self.model.add(MaxPooling1D(pool_size=3))
+                self.model.add(Conv1D(filters=self.num_filters/2, kernel_size=filter_size, 
+                                        strides=1, padding='valid', activation='relu'))
+                self.model.add(MaxPooling1D(pool_size=(..TODO.. - filter_size + 1)))
 
+                #self.model.add(Dropout(2*DROPOUT))
+                self.model.add(Dense(2, activation='softmax'))
 
             elif self.arch == "ensamble":
                 print("Start")

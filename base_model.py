@@ -27,8 +27,16 @@ class BaseModel:
             os.mkdir(CKPT_DIR)
 
         # Create the embedding layer and load pretrained embeddings.
-        embedding_matrix = self.data_source.get_embeddings()
+        embedding_matrix = self.data_source.get_embeddings("glove")
         self.embedding_layer = Embedding(
+            input_dim=self.vocab.vocab_size,
+            output_dim=self.data_source.embedding_dim,
+            weights=[embedding_matrix],
+            input_length=seq_length,
+            trainable=True)
+
+        embedding_matrix = self.data_source.get_embeddings("word2vec")
+        self.embedding_layer2 = Embedding(
             input_dim=self.vocab.vocab_size,
             output_dim=self.data_source.embedding_dim,
             weights=[embedding_matrix],

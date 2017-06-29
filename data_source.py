@@ -24,6 +24,7 @@ class DataSource(BaseDataSource):
         self.openai_features_dir = openai_features_dir
         self.curr_openai_batch = None
         self.curr_openai_batch_id = 0
+        self.embedding_type = embedding_type.split(',')
 
         self.start = 0
 
@@ -81,10 +82,11 @@ class DataSource(BaseDataSource):
                 self._test = (self._test, test_openai_features)
         print("Loaded test set")
 
+    def get_embeddings(self, embedding_type):
         if embedding_type == "glove":
             # Read embeddings.
             embedding_dict = {}
-            with open(embedding_file, "r") as f:
+            with open(self.embedding_file[0], "r") as f:
                 content = [line.strip().split(" ") for line in f.readlines()]
                 embedding_dict = dict(
                     (l[0], [float(x) for x in l[1:]]) for l in content)
@@ -92,7 +94,7 @@ class DataSource(BaseDataSource):
 
             # Construct the embedding matrix. Row i has the embedding for the token
             # with tokID i.
-            self.embedding_matrix = []
+            embedding_matrix = []
             for i in np.arange(self.vocab.vocab_size):
                 token = self.vocab.sorted_vocab[i]
 
@@ -105,20 +107,20 @@ class DataSource(BaseDataSource):
                 # in the embedding matrix, but what we could do is ignore these
                 # words when we create the vocabulary.
                 if token not in embedding_dict:
-                    self.embedding_matrix.append([
+                    embedding_matrix.append([
                         random.random()
                         for i in np.arange(self.embedding_dim)])
                 else:
-                    self.embedding_matrix.append(embedding_dict[token])
+                    embedding_matrix.append(embedding_dict[token])
 
-            self.embedding_matrix = np.array(self.embedding_matrix)
+            embedding_matrix = np.array(embedding_matrix)
         elif embedding_type == "word2vec":
             print("Loading word2vec")
             # Read embeddings.
             model =  gensim.models.KeyedVectors.load_word2vec_format('data/word2vec.bin', binary=True, unicode_errors='ignore')
             # Construct the embedding matrix. Row i has the embedding for the token
             # with tokID i.
-            self.embedding_matrix = []
+            embedding_matrix = []
             for i in np.arange(self.vocab.vocab_size):
                 token = self.vocab.sorted_vocab[i]
 
@@ -131,18 +133,16 @@ class DataSource(BaseDataSource):
                 # in the embedding matrix, but what we could do is ignore these
                 # words when we create the vocabulary.
                 if token not in model:
-                    self.embedding_matrix.append([
+                    embedding_matrix.append([
                         random.random()
                         for i in np.arange(self.embedding_dim)])
                 else:
-                    self.embedding_matrix.append(model[token])
+                    embedding_matrix.append(model[token])
 
-            self.embedding_matrix = np.array(self.embedding_matrix)
+            embedding_matrix = np.array(embedding_matrix)
 
         print("Contructed embedding matrix")
-
-    def get_embeddings(self):
-        return self.embedding_matrix
+        return embedding_matrix
 
     def train(self, num_samples=None):
         if num_samples is None:
