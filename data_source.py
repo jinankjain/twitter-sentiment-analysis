@@ -8,6 +8,8 @@ OPENAI_SAMPLES_PER_BATCH = 10000
 OPENAI_BATCHES = 25
 OPENAI_TRAIN_BATCHES = OPENAI_BATCHES - int(VALIDATION_SIZE / OPENAI_SAMPLES_PER_BATCH)
 
+WORD2VEC_FILE = "/mnt/ds3lab/tifreaa/word2vec_twitter/word2vec_twitter_model/word2vec_twitter_model.bin"
+
 
 class DataSource(BaseDataSource):
     def __init__(self, vocab, labeled_data_file, test_data_file,
@@ -121,7 +123,7 @@ class DataSource(BaseDataSource):
         elif embedding_type == "word2vec":
             print("Loading word2vec")
             # Read embeddings.
-            model =  gensim.models.KeyedVectors.load_word2vec_format('data/word2vec.bin', binary=True, unicode_errors='ignore')
+            model = gensim.models.KeyedVectors.load_word2vec_format(WORD2VEC_FILE, binary=True, unicode_errors='ignore')
             # Construct the embedding matrix. Row i has the embedding for the token
             # with tokID i.
             embedding_matrix = []

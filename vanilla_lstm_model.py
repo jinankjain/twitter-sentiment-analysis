@@ -13,6 +13,7 @@ from keras.layers import Conv1D
 from keras.layers import Conv2D
 from keras.layers import MaxPooling1D
 from keras.layers import Merge
+from keras.layers.core import Flatten
 from keras.layers.wrappers import Bidirectional
 from keras.models import Model
 from keras.models import Sequential
@@ -57,7 +58,7 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "conv":
                 conv_filters = []
-                for filter_size in self.filters:
+                for filter_size in self.filter_sizes:
                     conv_filters.append(Sequential())
                     conv_filters[-1].add(self.embedding_layer)
                     conv_filters[-1].add(Conv1D(filters=self.num_filters, kernel_size=filter_size,
@@ -65,7 +66,12 @@ class VanillaLSTMModel(BaseModel):
                     conv_filters[-1].add(MaxPooling1D(pool_size=(self.seq_length - filter_size + 1)))
                 self.model = Sequential()
                 self.model.add(Merge(conv_filters, mode='concat'))
+                self.model.add(Flatten())
                 self.model.add(Dropout(2*DROPOUT))
+                # TODO: maybe add another Dense layer
+                self.model.add(Dense(512, activation='softmax'))
+                self.model.add(Dropout(2*DROPOUT))
+
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "conv2":
                 # https://github.com/fchollet/keras/issues/233
@@ -99,7 +105,7 @@ class VanillaLSTMModel(BaseModel):
                 #self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(2, activation='softmax'))
 
-            elif self.arch == "ensamble":
+            elif self.arch == "ensemble":
                 print("Start")
                 branch1 = Sequential()
                 branch1.add(self.embedding_layer)
@@ -123,6 +129,28 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Dropout(2*DROPOUT))
 #                 self.model.add(Dense(512, activation='relu'))
 #                 self.model.add(Dropout(2*DROPOUT))
+
+                self.model.add(Dense(2, activation='softmax'))
+            elif self.arch == "ensemble":
+                print("Start")
+                branch1 = Sequential()
+                branch1.add(self.embedding_layer)
+                branch1.add(LSTM(LSTM_SIZE, dropout=self.drop_prob,
+                                 recurrent_dropout=self.drop_prob,
+                                 implementation=2, unroll=True))
+
+                print("Created first model")
+
+                branch2 = Sequential()
+                branch2.add(Dense(OPENAI_REDUCED_SIZE,
+                    activation="linear", input_shape=(OPENAI_FEATURE_SIZE,)))
+                print("Created second model")
+
+                self.model = Sequential()
+                self.model.add(Merge([branch1, branch2], mode='concat'))
+
+                self.model.add(Dense(1024, activation='relu'))
+                self.model.add(Dropout(2*DROPOUT))
 
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "multi_layer":
@@ -186,12 +214,14 @@ if __name__ == "__main__":
                         action='store_const', const='bidi')
     parser.add_argument('--multi_layer', dest='lstm_arch',
                         action='store_const', const='multi_layer')
-    parser.add_argument('--ensamble', dest='lstm_arch',
-                        action='store_const', const='ensamble')
+    parser.add_argument('--ensemble', dest='lstm_arch',
+                        action='store_const', const='ensemble')
     parser.add_argument('--conv', dest='lstm_arch',
                         action='store_const', const='conv')
     parser.add_argument('--conv2', dest='lstm_arch',
                         action='store_const', const='conv2')
+    parser.add_argument('--conv_lstm', dest='lstm_arch',
+                        action='store_const', const='conv_lstm')
     parser.add_argument('--swisscheese', dest='lstm_arch',
                         action='store_const', const='swisscheese')
     parser.add_argument('--embedding_type', type=str, default="glove", nargs="?",
@@ -200,7 +230,7 @@ if __name__ == "__main__":
 
     vocab = Vocabulary("data/vocab.pkl")
     openai_features_dir = None
-    if args.lstm_arch == "ensamble":
+    if args.lstm_arch == "ensemble":
         openai_features_dir = "/mnt/ds3lab/tifreaa/openai_features/"
 
     data_source = DataSource(

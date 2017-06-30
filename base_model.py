@@ -65,7 +65,7 @@ class BaseModel:
 
     def train(self, batch_size, loss='categorical_crossentropy'):
         X_val, y_val, openai_features = None, None, None
-        if self.arch is not "ensamble":
+        if self.arch is not "ensemble":
             X_val, y_val = self.data_source.validation()
         else:
             X_val, y_val, val_openai_features = self.data_source.validation()
@@ -88,7 +88,7 @@ class BaseModel:
                 filepath=CKPT_DIR + self.arch + '_lstm_' + opt_name + \
                         '_ckpt-' + str(iteration) + '-{val_loss:.2f}.hdf5')
             curr_X_train, curr_y_train, openai_features = None, None, None
-            if self.arch is not "ensamble":
+            if self.arch is not "ensemble":
                 curr_X_train, curr_y_train = self.data_source.next_train_batch(
                     STEPS_PER_CKPT)
             else:
@@ -97,7 +97,7 @@ class BaseModel:
             curr_y_train = to_categorical((curr_y_train + 1) / 2, num_classes=2)
 
             input_X, val_X = None, None
-            if self.arch is not "ensamble":
+            if self.arch is not "ensemble":
                 input_X = curr_X_train
                 val_X = X_val
             else:
@@ -120,13 +120,13 @@ class BaseModel:
     """
     def eval(self):
         X, y, openai_features = None, None, None
-        if self.arch is not "ensamble":
+        if self.arch is not "ensemble":
             X, y = self.data_source.validation()
         else:
             X, y, openai_features = self.data_source.validation()
         y = to_categorical((y + 1) / 2, num_classes=2)
 
-        if self.arch is not "ensamble":
+        if self.arch is not "ensemble":
             scores = self.model.evaluate(X, y, verbose=0)
         else:
             scores = self.model.evaluate([X, openai_features], y, verbose=0)
@@ -137,11 +137,11 @@ class BaseModel:
     """
     def predict(self):
         X, openai_features = None, None
-        if self.arch is not "ensamble":
+        if self.arch is not "ensemble":
             X = self.data_source.test()
         else:
             X, openai_features = self.data_source.test()
-        if self.arch is not "ensamble":
+        if self.arch is not "ensemble":
             y_predict = np.argmax(self.model.predict(X), axis=1)
         else:
             y_predict = np.argmax(
