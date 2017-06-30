@@ -12,8 +12,10 @@ from keras.layers import LSTM
 from keras.layers import Conv1D
 from keras.layers import Conv2D
 from keras.layers import MaxPooling1D
+from keras.layers import MaxPooling2D
 from keras.layers import Merge
 from keras.layers.core import Flatten
+from keras.layers.core import Reshape
 from keras.layers.wrappers import Bidirectional
 from keras.models import Model
 from keras.models import Sequential
@@ -80,13 +82,11 @@ class VanillaLSTMModel(BaseModel):
                 self.model = Sequential()
                 self.model.add(self.embedding_layer)
                 #self.model.add(Embedding(max_features, 256)) # embed into dense 3D float tensor (samples, maxlen, 256)
-                self.model.add(Reshape(1, maxlen, self.data_source.embedding_dim)) # reshape into 4D tensor (samples, 1, maxlen, 256)
+                self.model.add(Reshape((SEQ_LEN, self.data_source.embedding_dim, 1))) # reshape into 4D tensor (samples, maxlen, 256, 1)
                 # VGG-like convolution stack
-                self.model.add(Convolution2D(32, 3, 3, 3, border_mode='full'))
-                self.model.add(Activation('relu'))
-                self.model.add(Convolution2D(32, 32, 3, 3))
-                self.model.add(Activation('relu'))
-                self.model.add(MaxPooling2D(poolsize=(2, 2)))
+                self.model.add(Conv2D(32, 3, padding='valid', activation='relu'))
+                self.model.add(Conv2D(32, 3, activation='relu'))
+                self.model.add(MaxPooling2D(pool_size=(2, 2)))
                 self.model.add(Dropout(0.25))
                 self.model.add(Flatten())
                 self.model.add(Dropout(2*DROPOUT))
