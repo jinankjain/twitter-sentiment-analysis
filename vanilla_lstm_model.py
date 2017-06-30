@@ -85,10 +85,10 @@ class VanillaLSTMModel(BaseModel):
                 #emb_channels[1].add(self.embedding_layer2)
                 #self.model = Sequential()
                 #self.model.add(Merge(emb_filters, mode='concat'))
-                #self.model.add(Reshape((SEQ_LEN, self.data_source.embedding_dim, len(emb_channels))) # reshape into 4D tensor (samples, maxlen, 256, 2)
                 # comment out bottom two lines and uncomment top lines + embedding_layer2 loading in base_model for multi channels
                 self.model = Sequential()
                 self.model.add(self.embedding_layer)
+                self.model.add(Reshape((SEQ_LEN, self.data_source.embedding_dim, len(emb_channels)))) # reshape into 4D tensor (samples, maxlen, 256, 2)
                 # VGG-like convolution stack
                 self.model.add(Conv2D(32, 3, padding='valid', activation='relu'))
                 self.model.add(Conv2D(32, 3, activation='relu'))
