@@ -18,13 +18,14 @@ class DataSource(BaseDataSource):
         self._test = None
 
         self.vocab = vocab
+        self.embedding_file = embedding_file
         self.embedding_dim = embedding_dim
         self.seq_length = seq_length
 
         self.openai_features_dir = openai_features_dir
         self.curr_openai_batch = None
         self.curr_openai_batch_id = 0
-        self.embedding_type = embedding_type.split(',')
+        self.embedding_type = embedding_type
 
         self.start = 0
 
@@ -82,11 +83,14 @@ class DataSource(BaseDataSource):
                 self._test = (self._test, test_openai_features)
         print("Loaded test set")
 
-    def get_embeddings(self, embedding_type):
+    def get_embeddings(self, embedding_type=None):
+        if embedding_type is None:
+            embedding_type = self.embedding_type
+        embedding_matrix = None
         if embedding_type == "glove":
             # Read embeddings.
             embedding_dict = {}
-            with open(self.embedding_file[0], "r") as f:
+            with open(self.embedding_file, "r") as f:
                 content = [line.strip().split(" ") for line in f.readlines()]
                 embedding_dict = dict(
                     (l[0], [float(x) for x in l[1:]]) for l in content)

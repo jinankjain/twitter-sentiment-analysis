@@ -26,25 +26,36 @@ class BaseModel:
         if not os.path.exists(CKPT_DIR):
             os.mkdir(CKPT_DIR)
 
-        # Create the embedding layer and load pretrained embeddings.
-        embedding_matrix = self.data_source.get_embeddings("glove")
-        self.embedding_layer = Embedding(
-            input_dim=self.vocab.vocab_size,
-            output_dim=self.data_source.embedding_dim,
-            weights=[embedding_matrix],
-            input_length=seq_length,
-            trainable=True)
-
-        embedding_matrix = self.data_source.get_embeddings("word2vec")
-        self.embedding_layer2 = Embedding(
-            input_dim=self.vocab.vocab_size,
-            output_dim=self.data_source.embedding_dim,
-            weights=[embedding_matrix],
-            input_length=seq_length,
-            trainable=True)
 
         self.model = None
+        self.embedding_layer = None
         self.arch = arch
+
+        # Create the embedding layer and load pretrained embeddings.
+        if self.arch == "conv2":
+            embedding_matrix = self.data_source.get_embeddings("glove")
+            self.embedding_layer = Embedding(
+                input_dim=self.vocab.vocab_size,
+                output_dim=self.data_source.embedding_dim,
+                weights=[embedding_matrix],
+                input_length=seq_length,
+                trainable=True)
+
+            embedding_matrix = self.data_source.get_embeddings("word2vec")
+            self.embedding_layer2 = Embedding(
+                input_dim=self.vocab.vocab_size,
+                output_dim=self.data_source.embedding_dim,
+                weights=[embedding_matrix],
+                input_length=seq_length,
+                trainable=True)
+        else:
+            embedding_matrix = self.data_source.get_embeddings()
+            self.embedding_layer = Embedding(
+                input_dim=self.vocab.vocab_size,
+                output_dim=self.data_source.embedding_dim,
+                weights=[embedding_matrix],
+                input_length=seq_length,
+                trainable=True)
 
     """
     This method should create a keras model.
@@ -61,7 +72,7 @@ class BaseModel:
 
         y_val = to_categorical((y_val + 1) / 2, num_classes=2)
 
-        opt = Adam(lr=0.001)
+        opt = Adam(lr=0.0001)
         opt_name = "adam"
 #         opt = RMSprop(lr=0.001, decay=0.95)
 #         opt_name = "RMSP"
