@@ -105,7 +105,7 @@ class VanillaLSTMModel(BaseModel):
                 #self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(2, activation='softmax'))
 
-            elif self.arch == "ensemble":
+            elif self.arch == "conv_lstm":
                 print("Start")
                 branch1 = Sequential()
                 branch1.add(self.embedding_layer)
@@ -115,20 +115,24 @@ class VanillaLSTMModel(BaseModel):
 
                 print("Created first model")
 
+                conv_filters = []
+                for filter_size in self.filter_sizes:
+                    conv_filters.append(Sequential())
+                    conv_filters[-1].add(self.embedding_layer)
+                    conv_filters[-1].add(Conv1D(filters=self.num_filters, kernel_size=filter_size,
+                                          strides=1, padding='valid', activation='relu'))
+                    conv_filters[-1].add(MaxPooling1D(pool_size=(self.seq_length - filter_size + 1)))
                 branch2 = Sequential()
-                branch2.add(Dense(OPENAI_REDUCED_SIZE,
-                    activation="linear", input_shape=(OPENAI_FEATURE_SIZE,)))
+                branch2.add(Merge(conv_filters, mode='concat'))
+                branch2.add(Flatten())
+                branch2.add(Dropout(2*DROPOUT))
                 print("Created second model")
 
                 self.model = Sequential()
                 self.model.add(Merge([branch1, branch2], mode='concat'))
-                # Add 3 fully-connected layers.
-#                 self.model.add(Dense(2048, activation='relu'))
-#                 self.model.add(Dropout(2*DROPOUT))
+
                 self.model.add(Dense(1024, activation='relu'))
                 self.model.add(Dropout(2*DROPOUT))
-#                 self.model.add(Dense(512, activation='relu'))
-#                 self.model.add(Dropout(2*DROPOUT))
 
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "ensemble":
