@@ -77,12 +77,18 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "conv2":
                 # https://github.com/fchollet/keras/issues/233
-                # input: 2D tensor of integer indices of characters (eg. 1-57).
                 # input tensor has shape (samples, maxlen)
+                emb_channels = []
+                emb_channels.append(Sequential()) 
+                #emb_channels[0].add(self.embedding_layer)
+                #emb_channels.append(Sequential()) 
+                #emb_channels[1].add(self.embedding_layer2)
+                #self.model = Sequential()
+                #self.model.add(Merge(emb_filters, mode='concat'))
+                #self.model.add(Reshape((SEQ_LEN, self.data_source.embedding_dim, len(emb_channels))) # reshape into 4D tensor (samples, maxlen, 256, 2)
+                # comment out bottom two lines and uncomment top lines + embedding_layer2 loading in base_model for multi channels
                 self.model = Sequential()
                 self.model.add(self.embedding_layer)
-                #self.model.add(Embedding(max_features, 256)) # embed into dense 3D float tensor (samples, maxlen, 256)
-                self.model.add(Reshape((SEQ_LEN, self.data_source.embedding_dim, 1))) # reshape into 4D tensor (samples, maxlen, 256, 1)
                 # VGG-like convolution stack
                 self.model.add(Conv2D(32, 3, padding='valid', activation='relu'))
                 self.model.add(Conv2D(32, 3, activation='relu'))
