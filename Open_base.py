@@ -3,11 +3,11 @@ import numpy as np
 from sklearn.externals import joblib
 from sklearn.metrics import accuracy_score
 
-OPENAI_DIRECTORY=""
+OPENAI_DIRECTORY="/mnt/ds3lab/tifreaa/openai_features/"
 
 def sgd():
     svm = SGDClassifier(loss='hinge')
-    for i in range(1,5):
+    for i in range(0,150):
         print(i)
         X= np.load(OPENAI_DIRECTORY+"X"+ str(i)+".npy")
         Y = np.load(OPENAI_DIRECTORY+"Y" + str(i) + ".npy")
@@ -23,6 +23,6 @@ def sgd():
         else:
             temp.append(0)
     print(accuracy_score(Y[:10000], temp))
-    joblib.dump(svm, 'openai.pkl')
+    joblib.dump(svm, 'models/openai_baseline.pkl')
 
 sgd()

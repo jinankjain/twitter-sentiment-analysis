@@ -113,6 +113,13 @@ class BaseModel:
                 batch_size=batch_size,
                 verbose=1,
                 callbacks=[checkpoint])
+            if self.arch == "conv_lstm":
+                y_test = self.predict()
+                with open("data/ensemble_test_outputs/conv_lstm_test_out_"+
+                        str(iteration)+".txt", "w") as f:
+                    f.write("Id,Prediction\n")
+                    for idx, y in zip(np.arange(y_test.shape[0]), y_test):
+                        f.write(str(idx+1) + "," + str(y) + "\n")
             iteration += STEPS_PER_CKPT
 
     """
