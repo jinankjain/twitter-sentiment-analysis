@@ -1,8 +1,18 @@
 import os
 
+SEQ_LEN = 40
+ROOT_DIR = "data"
+TEST_FILES = ["lstm.txt", "openai.csv", "cnn.csv", "multi.txt", "bidi.txt"]
 
-DATA_SOURCE = "data"
-FILES = ["lstm.txt", "openai.csv", "cnn.csv", "multi.txt", "bidi.txt"]
+
+data_source = DataSource(
+    vocab=vocab,
+    labeled_data_file="data/full_data.txt",
+    test_data_file="data/test_data.txt",
+    embedding_file=None,
+    embedding_dim=None,
+    seq_length=SEQ_LEN,
+    embedding_type=None)
 
 result = []
 
@@ -10,7 +20,7 @@ for i in range(0, 10000):
 	result.append([0, 0])
 
 for f in FILES:
-	file_path = os.path.join(DATA_SOURCE, f)
+	file_path = os.path.join(ROOT_DIR, f)
 	file_pointer = open(file_path, 'r')
 	lines = file_pointer.readlines()[1:]
 	for i in range(0, len(lines)):
@@ -22,7 +32,7 @@ for f in FILES:
 	file_pointer.close()
 
 max_sol = "max_sol.txt"
-max_sol_path = os.path.join(DATA_SOURCE, max_sol)
+max_sol_path = os.path.join(ROOT_DIR, max_sol)
 f = open(max_sol_path, 'w')
 f.write("Id,Prediction\n")
 

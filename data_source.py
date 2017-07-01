@@ -8,8 +8,8 @@ OPENAI_SAMPLES_PER_BATCH = 10000
 OPENAI_BATCHES = 25
 OPENAI_TRAIN_BATCHES = OPENAI_BATCHES - int(VALIDATION_SIZE / OPENAI_SAMPLES_PER_BATCH)
 
-#WORD2VEC_FILE = "/mnt/ds3lab/tifreaa/word2vec_twitter/word2vec_twitter_model/word2vec_twitter_model.bin"
-WORD2VEC_FILE = "data/word2vec.bin"
+WORD2VEC_FILE = "/mnt/ds3lab/tifreaa/word2vec_twitter/word2vec_twitter_model/word2vec_twitter_model.bin"
+#WORD2VEC_FILE = "data/word2vec.bin"
 
 
 class DataSource(BaseDataSource):

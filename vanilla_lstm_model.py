@@ -38,7 +38,7 @@ class VanillaLSTMModel(BaseModel):
         BaseModel.__init__(self, vocab, data_source, lstm_size, drop_prob,
                            seq_length, arch)
         self.filter_sizes = [3, 4, 5]
-        self.num_filters = 128
+        self.num_filters = 256
 
     def create_model(self, ckpt_file=None):
         if ckpt_file is None:
@@ -79,9 +79,9 @@ class VanillaLSTMModel(BaseModel):
                 # https://github.com/fchollet/keras/issues/233
                 # input tensor has shape (samples, maxlen)
                 emb_channels = []
-                emb_channels.append(Sequential()) 
+                emb_channels.append(Sequential())
                 #emb_channels[0].add(self.embedding_layer)
-                #emb_channels.append(Sequential()) 
+                #emb_channels.append(Sequential())
                 #emb_channels[1].add(self.embedding_layer2)
                 #self.model = Sequential()
                 #self.model.add(Merge(emb_filters, mode='concat'))
@@ -97,18 +97,27 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Flatten())
                 self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(2, activation='softmax'))
-            elif self.arch == "swisscheese":
+            elif self.arch == "seq_conv":
                 self.model = Sequential()
                 filter_size = 3
                 self.model.add(self.embedding_layer)
                 self.model.add(Conv1D(filters=self.num_filters, kernel_size=filter_size,
-                                        strides=1, padding='valid', activation='relu'))
-                self.model.add(MaxPooling1D(pool_size=3))
-                self.model.add(Conv1D(filters=self.num_filters/2, kernel_size=filter_size,
-                                        strides=1, padding='valid', activation='relu'))
-#                 self.model.add(MaxPooling1D(pool_size=(..TODO.. - filter_size + 1)))
+                                        strides=1, padding='same', activation='relu'))
+                self.model.add(Conv1D(filters=int(self.num_filters/2), kernel_size=filter_size,
+                                        strides=1, padding='same', activation='relu'))
+                self.model.add(MaxPooling1D(pool_size=2))
 
-                #self.model.add(Dropout(2*DROPOUT))
+                self.model.add(Conv1D(filters=int(self.num_filters/4), kernel_size=filter_size,
+                                        strides=1, padding='same', activation='relu'))
+                self.model.add(Conv1D(filters=int(self.num_filters/4), kernel_size=filter_size,
+                                        strides=1, padding='same', activation='relu'))
+                self.model.add(MaxPooling1D(pool_size=2))
+
+                self.model.add(Flatten())
+                self.model.add(Dense(1024, activation='relu'))
+                self.model.add(Dropout(2*DROPOUT))
+                self.model.add(Dense(512, activation='relu'))
+                self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(2, activation='softmax'))
 
             elif self.arch == "conv_lstm":
@@ -232,8 +241,8 @@ if __name__ == "__main__":
                         action='store_const', const='conv2')
     parser.add_argument('--conv_lstm', dest='lstm_arch',
                         action='store_const', const='conv_lstm')
-    parser.add_argument('--swisscheese', dest='lstm_arch',
-                        action='store_const', const='swisscheese')
+    parser.add_argument('--seq_conv', dest='lstm_arch',
+                        action='store_const', const='seq_conv')
     parser.add_argument('--embedding_type', type=str, default="glove", nargs="?",
                         help='Type of word embedding Word2Vec or Glove')
     args = parser.parse_args()
@@ -273,8 +282,30 @@ if __name__ == "__main__":
 #         model.eval()
 
         print("Predicting labels on test set...")
-        y_test = model.predict()
-        with open("data/test_output.txt", "w") as f:
+        y_test, y_probs = model.predict()
+        with open("data/" + args.lstm_arch + "_test_output.txt", "w") as f:
             f.write("Id,Prediction\n")
             for idx, y in zip(np.arange(y_test.shape[0]), y_test):
                 f.write(str(idx+1) + "," + str(y) + "\n")
+        with open("data/" + args.lstm_arch + "_test_probs.txt", "w") as f:
+            f.write("Id,Probabilities\n")
+            for idx, y in zip(np.arange(y_probs.shape[0]), y_probs):
+                f.write(str(idx+1) + "," + str(y[1]) + "\n")
+
+        print("Predicting labels on validation set...")
+        y_val, y_probs = model.predict(data_source.validation()[0])
+        with open("data/" + args.lstm_arch + "_validation_probs.txt", "w") as f:
+            f.write("Id,Probabilities,Predicted label,True label\n")
+            for idx, probs, pred_y, true_y in zip( np.arange(y_probs.shape[0]), y_probs,
+                    y_val, data_source.validation()[1]):
+                f.write(str(idx+1) + "," + str(probs[1]) + "," + str(pred_y) +
+                        "," + str(true_y) + "\n")
+
+        print("Dumping probabilities for a subset of the training set...")
+        y_train, y_probs = model.predict(data_source.train()[0][:400000])
+        with open("data/" + args.lstm_arch + "_train_probs.txt", "w") as f:
+            f.write("Id,Probabilities,Predicted label,True label\n")
+            for idx, probs, pred_y, true_y in zip( np.arange(y_probs.shape[0]), y_probs,
+                    y_train, data_source.train()[1][:400000]):
+                f.write(str(idx+1) + "," + str(probs[1]) + "," + str(pred_y) +
+                        "," + str(true_y) + "\n")

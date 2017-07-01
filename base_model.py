@@ -114,7 +114,7 @@ class BaseModel:
                 verbose=1,
                 callbacks=[checkpoint])
             if self.arch == "conv_lstm":
-                y_test = self.predict()
+                y_test, _ = self.predict()
                 with open("data/ensemble_test_outputs/conv_lstm_test_out_"+
                         str(iteration)+".txt", "w") as f:
                     f.write("Id,Prediction\n")
@@ -142,20 +142,23 @@ class BaseModel:
     """
     Get the predictions of the model on a test set.
     """
-    def predict(self):
-        X, openai_features = None, None
+    def predict(self, X=None):
+        openai_features, probabilities = None, None
+        if X is None:
+            if self.arch is not "ensemble":
+                X = self.data_source.test()
+            else:
+                X, openai_features = self.data_source.test()
+
         if self.arch is not "ensemble":
-            X = self.data_source.test()
-        else:
-            X, openai_features = self.data_source.test()
-        if self.arch is not "ensemble":
-            y_predict = np.argmax(self.model.predict(X), axis=1)
+            probabilities = self.model.predict(X)
+            y_predict = np.argmax(probabilities, axis=1)
         else:
             y_predict = np.argmax(
                     self.model.predict([X, openai_features]), axis=1)
         y_predict = y_predict * 2 - 1
 
-        return y_predict
+        return y_predict, probabilities
 
     """
     Store model in JSON format and store the weights in HDFS.
