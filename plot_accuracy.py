@@ -17,10 +17,12 @@ def plot_graph(type:str):
     elif type == "validation":
         draw_accuracy(ax, type)
         label_y = ax.set_ylabel('Validation accuracy', fontsize = 15)
-    legend = ax.legend(loc=4, shadow=True)
+    legend = ax.legend(loc=4, shadow=True, fontsize=20)
     plt.grid(True)
     ax = plt.gca()
     ax.xaxis.set_ticks(np.arange(0,120, 10))
+    plt.tick_params(axis='both', which='major', labelsize=15)
+    plt.tick_params(axis='both', which='minor', labelsize=8)
     label_x = ax.set_xlabel('Number of batches', fontsize = 15)
     plt.show()
 
