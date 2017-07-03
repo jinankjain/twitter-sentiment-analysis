@@ -1,21 +1,21 @@
 import os
 
-RUN_SEQ_CONV = "python3 vanilla_lstm_model.py --is_eval --emb_len=400" \
+RUN_SEQ_CONV = "python3 model.py --is_eval --emb_len=400" \
                " --embedding_type=word2vec" \
                " --ckpt_file=data/checkpoints/seq_conv_lstm_adam_ckpt-10000000-0.27.hdf5" \
                " --seq_conv --train_file=data/full_train.txt"
 
-RUN_BIDI = "python3 vanilla_lstm_model.py --is_eval --emb_len=200" \
+RUN_BIDI = "python3 model.py --is_eval --emb_len=200" \
            " --embedding_type=glove" \
            " --ckpt_file=data/checkpoints/bidi_lstm_adam_ckpt-15600000-0.26.hdf5" \
            " --bidi --train_file=data/full_train.txt"
 
-RUN_GRU = "python3 vanilla_lstm_model.py --is_eval --emb_len=200" \
+RUN_GRU = "python3 model.py --is_eval --emb_len=200" \
           " --embedding_type=glove" \
           " --ckpt_file=data/checkpoints/gru_lstm_adam_ckpt-19200000-0.26.hdf5" \
           " --gru --train_file=data/full_train.txt"
 
-RUN_SWISS_CHESSE = "python3 vanilla_lstm_model.py --is_eval --emb_len=400" \
+RUN_SWISS_CHESSE = "python3 model.py --is_eval --emb_len=400" \
                    " --embedding_type=word2vec" \
                    " --ckpt_file=data/checkpoints/swisscheese_lstm_adam_ckpt-11400000-0.28.hdf5" \
                    " --swisscheese --train_file=data/full_train.txt"
