@@ -70,7 +70,7 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Merge(conv_filters, mode='concat'))
                 self.model.add(Flatten())
                 self.model.add(Dropout(2*DROPOUT))
-                # TODO: maybe add another Dense layer
+
                 self.model.add(Dense(512, activation='softmax'))
                 self.model.add(Dropout(2*DROPOUT))
 
