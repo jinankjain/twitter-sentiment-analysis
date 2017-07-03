@@ -32,7 +32,7 @@ OPENAI_REDUCED_SIZE = 25
 BATCH_SIZE = 64
 
 
-class VanillaLSTMModel(BaseModel):
+class Model(BaseModel):
     def __init__(self, vocab, data_source, lstm_size=LSTM_SIZE,
                  drop_prob=DROPOUT, seq_length=SEQ_LEN, arch=None):
         BaseModel.__init__(self, vocab, data_source, lstm_size, drop_prob,
@@ -260,7 +260,7 @@ if __name__ == "__main__":
 
     print("ARCH", args.lstm_arch)
 
-    model = VanillaLSTMModel(
+    model = Model(
         vocab=vocab,
         data_source=data_source,
         lstm_size=LSTM_SIZE,
