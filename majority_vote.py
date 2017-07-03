@@ -2,17 +2,11 @@ import os
 
 SEQ_LEN = 40
 ROOT_DIR = "data"
-TEST_FILES = ["lstm.txt", "openai.csv", "cnn.csv", "multi.txt", "bidi.txt"]
+FILES = [
+    "bidi_test_output.txt", "gru_test_output.txt",
+    "ensemble_test_outputs/conv_lstm_test_out_10000000.txt",
+    "seq_conv_test_output.txt", "swisscheese_test_output.txt"]
 
-
-data_source = DataSource(
-    vocab=vocab,
-    labeled_data_file="data/full_data.txt",
-    test_data_file="data/test_data.txt",
-    embedding_file=None,
-    embedding_dim=None,
-    seq_length=SEQ_LEN,
-    embedding_type=None)
 
 result = []
 

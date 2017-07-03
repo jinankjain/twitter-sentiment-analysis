@@ -75,29 +75,23 @@ class VanillaLSTMModel(BaseModel):
                 self.model.add(Dropout(2*DROPOUT))
 
                 self.model.add(Dense(2, activation='softmax'))
-            elif self.arch == "conv2":
-                # https://github.com/fchollet/keras/issues/233
-                # input tensor has shape (samples, maxlen)
-                emb_channels = []
-                emb_channels.append(Sequential())
-                #emb_channels[0].add(self.embedding_layer)
-                #emb_channels.append(Sequential())
-                #emb_channels[1].add(self.embedding_layer2)
-                #self.model = Sequential()
-                #self.model.add(Merge(emb_filters, mode='concat'))
-                # comment out bottom two lines and uncomment top lines + embedding_layer2 loading in base_model for multi channels
+            elif self.arch == "seq_conv1":
                 self.model = Sequential()
+                filter_size = 3
                 self.model.add(self.embedding_layer)
-                self.model.add(Reshape((SEQ_LEN, self.data_source.embedding_dim, len(emb_channels)))) # reshape into 4D tensor (samples, maxlen, 256, 2)
-                # VGG-like convolution stack
-                self.model.add(Conv2D(32, 3, padding='valid', activation='relu'))
-                self.model.add(Conv2D(32, 3, activation='relu'))
-                self.model.add(MaxPooling2D(pool_size=(2, 2)))
-                self.model.add(Dropout(0.25))
+                self.model.add(Conv1D(filters=self.num_filters/2, kernel_size=filter_size,
+                                        strides=1, padding='valid', activation='relu'))
+                self.model.add(MaxPooling1D(pool_size=2))
+
+                self.model.add(Conv1D(filters=int(self.num_filters/4), kernel_size=filter_size,
+                                        strides=1, padding='valid', activation='relu'))
+                self.model.add(MaxPooling1D(pool_size=2))
+
                 self.model.add(Flatten())
+                self.model.add(Dense(1024, activation='relu'))
                 self.model.add(Dropout(2*DROPOUT))
                 self.model.add(Dense(2, activation='softmax'))
-            elif self.arch == "seq_conv":
+            elif self.arch == "seq_conv2":
                 self.model = Sequential()
                 filter_size = 3
                 self.model.add(self.embedding_layer)
@@ -241,8 +235,10 @@ if __name__ == "__main__":
                         action='store_const', const='conv2')
     parser.add_argument('--conv_lstm', dest='lstm_arch',
                         action='store_const', const='conv_lstm')
-    parser.add_argument('--seq_conv', dest='lstm_arch',
-                        action='store_const', const='seq_conv')
+    parser.add_argument('--seq_conv1', dest='lstm_arch',
+                        action='store_const', const='seq_conv1')
+    parser.add_argument('--seq_conv2', dest='lstm_arch',
+                        action='store_const', const='seq_conv2')
     parser.add_argument('--embedding_type', type=str, default="glove", nargs="?",
                         help='Type of word embedding Word2Vec or Glove')
     args = parser.parse_args()
