@@ -27,7 +27,11 @@ os.system(RUN_SWISS_CHESSE)
 
 SEQ_LEN = 40
 ROOT_DIR = "data"
-TEST_FILES = ["swisscheese_test_output.txt", "gru_test_output.txt", "seq_conv_test_output.csv", "bidi_test_output.txt"]
+FILES = [
+    "bidi_test_output.txt", "gru_test_output.txt",
+    "ensemble_test_outputs/conv_lstm_test_out_10000000.txt",
+    "seq_conv_test_output.txt", "swisscheese_test_output.txt"]
+
 
 result = []
 
