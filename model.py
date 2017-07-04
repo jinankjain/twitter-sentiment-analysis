@@ -34,9 +34,9 @@ BATCH_SIZE = 64
 
 class Model(BaseModel):
     def __init__(self, vocab, data_source, lstm_size=LSTM_SIZE,
-                 drop_prob=DROPOUT, seq_length=SEQ_LEN, arch=None):
+                 drop_prob=DROPOUT, seq_length=SEQ_LEN, arch=None, is_eval=False):
         BaseModel.__init__(self, vocab, data_source, lstm_size, drop_prob,
-                           seq_length, arch)
+                           seq_length, arch, is_eval)
         self.filter_sizes = [3, 4, 5]
         self.num_filters = 256
 
@@ -266,7 +266,8 @@ if __name__ == "__main__":
         data_source=data_source,
         lstm_size=LSTM_SIZE,
         drop_prob=DROPOUT,
-        arch=args.lstm_arch)
+        arch=args.lstm_arch,
+        is_eval=args.is_eval)
     print("Initialized model")
 
     if args.is_train:
