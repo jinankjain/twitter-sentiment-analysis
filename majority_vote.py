@@ -20,16 +20,16 @@ RUN_SWISS_CHESSE = "python3 model.py --is_eval --emb_len=400" \
                    " --ckpt_file=data/checkpoints/swisscheese_lstm_adam_ckpt-11400000-0.28.hdf5" \
                    " --seq_conv1 --train_file=data/full_train.txt"
 
-os.system(RUN_SEQ_CONV)
-os.system(RUN_BIDI)
-os.system(RUN_GRU)
-os.system(RUN_SWISS_CHESSE)
+# os.system(RUN_SEQ_CONV)
+# os.system(RUN_BIDI)
+# os.system(RUN_GRU)
+# os.system(RUN_SWISS_CHESSE)
 
 SEQ_LEN = 40
 ROOT_DIR = "data"
 FILES = [
     "bidi_test_output.txt", "gru_test_output.txt",
-    "ensemble_test_outputs/conv_lstm_test_out_10000000.txt",
+    "ensemble_test_outputs/conv_lstm_test_out_17400000.txt",
     "seq_conv2_test_output.txt", "seq_conv1_test_output.txt"]
 
 
