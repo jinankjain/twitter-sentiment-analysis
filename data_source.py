@@ -9,7 +9,6 @@ OPENAI_BATCHES = 25
 OPENAI_TRAIN_BATCHES = OPENAI_BATCHES - int(VALIDATION_SIZE / OPENAI_SAMPLES_PER_BATCH)
 
 WORD2VEC_FILE = "/mnt/ds3lab/tifreaa/word2vec_twitter/word2vec_twitter_model/word2vec_twitter_model.bin"
-#WORD2VEC_FILE = "data/word2vec.bin"
 
 
 class DataSource(BaseDataSource):
@@ -45,20 +44,16 @@ class DataSource(BaseDataSource):
             self._train = (
                 labeled_data[0][:num_train],
                 labeled_data[1][:num_train])
-            for i in np.arange(5):
-                print("DA", len(self._train[0][i]))
             self._validation = (
                 labeled_data[0][num_train:],
                 labeled_data[1][num_train:])
             if self.openai_features_dir is not None:
                 num_val_openai_batches = OPENAI_BATCHES - OPENAI_TRAIN_BATCHES
                 # Load last batch.
-#                 print("[OpenAI] Validation batch", OPENAI_BATCHES-1)
                 validation_openai_features = np.load(
                         self.openai_features_dir+"X" + str(OPENAI_BATCHES-1) + ".npy")
                 i = 1
                 while i < num_val_openai_batches:
-#                     print("[OpenAI] Validation batch", OPENAI_BATCHES-1-i)
                     openai_batch = np.load(
                             self.openai_features_dir+"X"+str(OPENAI_BATCHES-1-i)+".npy")
                     validation_openai_features = np.concatenate((
@@ -124,7 +119,8 @@ class DataSource(BaseDataSource):
         elif embedding_type == "word2vec":
             print("Loading word2vec")
             # Read embeddings.
-            model = gensim.models.KeyedVectors.load_word2vec_format(WORD2VEC_FILE, binary=True, unicode_errors='ignore')
+            model = gensim.models.KeyedVectors.load_word2vec_format(
+                    WORD2VEC_FILE, binary=True, unicode_errors='ignore')
             # Construct the embedding matrix. Row i has the embedding for the token
             # with tokID i.
             embedding_matrix = []
@@ -180,7 +176,6 @@ class DataSource(BaseDataSource):
         if with_openai_features:
             if self.curr_openai_batch is None:
                 # Load first batch.
-#                 print("[OpenAI] Train batch", 0)
                 self.curr_openai_batch = np.load(
                         self.openai_features_dir+"X0.npy")
 
@@ -191,7 +186,6 @@ class DataSource(BaseDataSource):
 
                 # Load next OpenAI batch (i.e. 10000 samples).
                 self.curr_openai_batch_id = (self.curr_openai_batch_id + 1) % OPENAI_TRAIN_BATCHES
-#                 print("[OpenAI] Train batch", self.curr_openai_batch_id)
                 self.curr_openai_batch = np.load(
                         self.openai_features_dir+"X"+
                         str(self.curr_openai_batch_id)+".npy")
