@@ -1,6 +1,12 @@
 import os
 
-RUN_SEQ_CONV = "python3 model.py --is_eval --emb_len=400" \
+# TODO: not swisscheese in file name!!
+RUN_SEQ_CONV1 = "python3 model.py --is_eval --emb_len=400" \
+                   " --embedding_type=word2vec" \
+                   " --ckpt_file=data/checkpoints/swisscheese_lstm_adam_ckpt-11400000-0.28.hdf5" \
+                   " --seq_conv1 --train_file=data/full_train.txt"
+
+RUN_SEQ_CONV2 = "python3 model.py --is_eval --emb_len=400" \
                " --embedding_type=word2vec" \
                " --ckpt_file=data/checkpoints/seq_conv_lstm_adam_ckpt-10000000-0.27.hdf5" \
                " --seq_conv2 --train_file=data/full_train.txt"
@@ -15,22 +21,17 @@ RUN_GRU = "python3 model.py --is_eval --emb_len=200" \
           " --ckpt_file=data/checkpoints/gru_lstm_adam_ckpt-19200000-0.26.hdf5" \
           " --gru --train_file=data/full_train.txt"
 
-RUN_SWISS_CHESSE = "python3 model.py --is_eval --emb_len=400" \
-                   " --embedding_type=word2vec" \
-                   " --ckpt_file=data/checkpoints/swisscheese_lstm_adam_ckpt-11400000-0.28.hdf5" \
-                   " --seq_conv1 --train_file=data/full_train.txt"
-
-os.system(RUN_SEQ_CONV)
+os.system(RUN_SEQ_CONV1)
+os.system(RUN_SEQ_CONV2)
 os.system(RUN_BIDI)
 os.system(RUN_GRU)
-os.system(RUN_SWISS_CHESSE)
 
 SEQ_LEN = 40
 ROOT_DIR = "data"
 FILES = [
-    "bidi_test_output.txt", "gru_test_output.txt",
-    "ensemble_test_outputs/conv_lstm_test_out_10000000.txt",
-    "seq_conv2_test_output.txt", "seq_conv1_test_output.txt"]
+    "seq_conv1_test_output.txt", "seq_conv2_test_output.txt",
+    "ensemble_test_outputs/conv_lstm_test_out_10000000.txt", # TODO: rename this
+    "bidi_test_output.txt", "gru_test_output.txt"]
 
 
 result = []
