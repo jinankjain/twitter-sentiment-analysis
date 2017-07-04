@@ -8,7 +8,7 @@ RUN_SEQ_CONV1 = "python3 model.py --is_eval --emb_len=400" \
 
 RUN_SEQ_CONV2 = "python3 model.py --is_eval --emb_len=400" \
                " --embedding_type=word2vec" \
-               " --ckpt_file=data/checkpoints/seq_conv_lstm_adam_ckpt-10000000-0.27.hdf5" \
+               " --ckpt_file=data/checkpoints/seq_conv_lstm_adam_ckpt-7600000-0.27.hdf5" \
                " --seq_conv2 --train_file=data/full_train.txt"
 
 RUN_BIDI = "python3 model.py --is_eval --emb_len=200" \
@@ -30,7 +30,7 @@ SEQ_LEN = 40
 ROOT_DIR = "data"
 FILES = [
     "seq_conv1_test_output.txt", "seq_conv2_test_output.txt",
-    "ensemble_test_outputs/conv_lstm_test_out_10000000.txt", # TODO: rename this
+    "ensemble_test_outputs/conv_lstm_test_out_17400000.txt", # TODO: rename this
     "bidi_test_output.txt", "gru_test_output.txt"]
 
 

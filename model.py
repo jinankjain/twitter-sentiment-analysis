@@ -209,7 +209,7 @@ class Model(BaseModel):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--is_train', dest='is_train', action='store_true')
-    parser.add_argument('--is_eval', dest='is_train', action='store_false')
+    parser.add_argument('--is_eval', dest='is_eval', action='store_true')
     parser.add_argument('--ckpt_file', type=str, default=None, nargs="?",
                         help='Path to checkpoint file')
     parser.add_argument('--train_file', type=str,
