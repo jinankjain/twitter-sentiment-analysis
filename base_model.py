@@ -15,7 +15,7 @@ CKPT_DIR = "data/checkpoints/"
 
 class BaseModel:
     def __init__(self, vocab, data_source, lstm_size, drop_prob, seq_length,
-                 arch):
+                 arch, is_eval=False):
         self.vocab = vocab
         self.data_source = data_source
 
@@ -33,29 +33,43 @@ class BaseModel:
 
         # Create the embedding layer and load pretrained embeddings.
         if self.arch == "conv2":
-            embedding_matrix = self.data_source.get_embeddings("glove")
-            self.embedding_layer = Embedding(
-                input_dim=self.vocab.vocab_size,
-                output_dim=self.data_source.embedding_dim,
-                weights=[embedding_matrix],
-                input_length=seq_length,
-                trainable=True)
+            if not is_eval:
+                embedding_matrix = self.data_source.get_embeddings("glove")
+                self.embedding_layer = Embedding(
+                    input_dim=self.vocab.vocab_size,
+                    output_dim=self.data_source.embedding_dim,
+                    weights=[embedding_matrix],
+                    input_length=seq_length,
+                    trainable=True)
 
-            #embedding_matrix = self.data_source.get_embeddings("word2vec")
-            #self.embedding_layer2 = Embedding(
-            #    input_dim=self.vocab.vocab_size,
-            #    output_dim=self.data_source.embedding_dim,
-            #    weights=[embedding_matrix],
-            #    input_length=seq_length,
-            #    trainable=True)
+                #embedding_matrix = self.data_source.get_embeddings("word2vec")
+                #self.embedding_layer2 = Embedding(
+                #    input_dim=self.vocab.vocab_size,
+                #    output_dim=self.data_source.embedding_dim,
+                #    weights=[embedding_matrix],
+                #    input_length=seq_length,
+                #    trainable=True)
+            else:
+                self.embedding_layer = Embedding(
+                    input_dim=self.vocab.vocab_size,
+                    output_dim=self.data_source.embedding_dim,
+                    input_length=seq_length,
+                    trainable=True)
         else:
-            embedding_matrix = self.data_source.get_embeddings()
-            self.embedding_layer = Embedding(
-                input_dim=self.vocab.vocab_size,
-                output_dim=self.data_source.embedding_dim,
-                weights=[embedding_matrix],
-                input_length=seq_length,
-                trainable=True)
+            if not is_eval:
+                embedding_matrix = self.data_source.get_embeddings()
+                self.embedding_layer = Embedding(
+                    input_dim=self.vocab.vocab_size,
+                    output_dim=self.data_source.embedding_dim,
+                    weights=[embedding_matrix],
+                    input_length=seq_length,
+                    trainable=True)
+            else:
+                self.embedding_layer = Embedding(
+                    input_dim=self.vocab.vocab_size,
+                    output_dim=self.data_source.embedding_dim,
+                    input_length=seq_length,
+                    trainable=True)
 
     """
     This method should create a keras model.
