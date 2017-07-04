@@ -115,6 +115,8 @@ class Model(BaseModel):
                 self.model.add(Dense(2, activation='softmax'))
 
             elif self.arch == "conv_lstm":
+                # Ensemble of sentence-level embedding obtained from an LSTM and
+                # a sentence-level embedding obtained from a CNN.
                 print("Start")
                 branch1 = Sequential()
                 branch1.add(self.embedding_layer)
@@ -145,6 +147,8 @@ class Model(BaseModel):
 
                 self.model.add(Dense(2, activation='softmax'))
             elif self.arch == "ensemble":
+                # Ensemble of sentence-level embedding obtained from an LSTM and
+                # a sentence-level embedding obtained from the OpenAI features.
                 print("Start")
                 branch1 = Sequential()
                 branch1.add(self.embedding_layer)
@@ -198,9 +202,6 @@ class Model(BaseModel):
             else:
                 raise NotImplementedError("Architecture is not implemented:",
                                           self.arch)
-
-            # TODO: maybe try to do pooling over hidden states like here:
-            # http://deeplearning.net/tutorial/lstm.html
         else:
             # Load model from checkpoint file.
             self.model = load_model(ckpt_file)
@@ -272,10 +273,17 @@ if __name__ == "__main__":
         model.create_model()
         print("Created model. Starting training.")
         model.train(batch_size=BATCH_SIZE, loss=args.loss)
+    elif args.is_eval:
+        model.create_model(args.ckpt_file)
+
+        print("Predicting labels on test set...")
+        y_test, y_probs = model.predict()
+        with open("data/" + args.lstm_arch + "_test_output.txt", "w") as f:
+            f.write("Id,Prediction\n")
+            for idx, y in zip(np.arange(y_test.shape[0]), y_test):
+                f.write(str(idx+1) + "," + str(y) + "\n")
     else:
         model.create_model(args.ckpt_file)
-#         print("Evaluating on validation set...")
-#         model.eval()
 
         print("Predicting labels on test set...")
         y_test, y_probs = model.predict()
@@ -294,14 +302,5 @@ if __name__ == "__main__":
             f.write("Id,Probabilities,Predicted label,True label\n")
             for idx, probs, pred_y, true_y in zip( np.arange(y_probs.shape[0]), y_probs,
                     y_val, data_source.validation()[1]):
-                f.write(str(idx+1) + "," + str(probs[1]) + "," + str(pred_y) +
-                        "," + str(true_y) + "\n")
-
-        print("Dumping probabilities for a subset of the training set...")
-        y_train, y_probs = model.predict(data_source.train()[0][:400000])
-        with open("data/" + args.lstm_arch + "_train_probs.txt", "w") as f:
-            f.write("Id,Probabilities,Predicted label,True label\n")
-            for idx, probs, pred_y, true_y in zip( np.arange(y_probs.shape[0]), y_probs,
-                    y_train, data_source.train()[1][:400000]):
                 f.write(str(idx+1) + "," + str(probs[1]) + "," + str(pred_y) +
                         "," + str(true_y) + "\n")

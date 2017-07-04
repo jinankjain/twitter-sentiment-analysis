@@ -26,7 +26,6 @@ class Vocabulary:
     not in the vocabulary, its ID is considered to be 0.
     """
     def get_tok_ids(self, text, seq_length):
-        # TODO: pad up to seq_length
         tokens = text.split()
         pad_count = seq_length - len(tokens)
 

@@ -74,8 +74,6 @@ class BaseModel:
 
         opt = Adam(lr=0.0001)
         opt_name = "adam"
-#         opt = RMSprop(lr=0.001, decay=0.95)
-#         opt_name = "RMSP"
         self.model.compile(
             loss=loss,
             optimizer=opt,
